@@ -10,34 +10,34 @@ import org.apache.tika.parser.ParseContext
 import org.apache.tika.parser.pdf.PDFParser
 import org.apache.tika.sax.WriteOutContentHandler
 
-object Pnyao {
-  case class Info(title : Option[String], author : Option[String], path : String) {
-    override def toString() = {
-      val title_ = title match {case None => "-" case Some(s) => s}
-      val author_ = author match {case None => "-" case Some(s) => s}
-      s"""title: ${title_}
-author: ${author_}
-path: ${path}"""
-    }
-  }
-
+private object Misc {
   def isMeaningfulString : String => Boolean =
     _ match {
-      case null => false
-      case "" => false
+      case null | "" => false
       case _ => true
     }
 
-  def nullableToString : String => String =
-    _ match {
-      case null => ""
-      case s => s
-    }
-
   def buildOptionalString(s : String) : Option[String] =
-    if (isMeaningfulString(s)) {
-      Some(s)
-    } else None
+    if (isMeaningfulString(s)) Some(s)
+    else None
+}
+
+object Pnyao {
+  // Info: pdf information data structure {{{
+  sealed abstract case class Info(title : Option[String], author : Option[String], path : String) {
+    override def toString() =
+      s"""title: ${title match {case None => "-" case Some(s) => s}}
+          author: ${author match {case None => "-" case Some(s) => s}}
+          path: ${path}""".replaceAll("""\n\s*""", "\n")
+  }
+
+  object Info {
+    def apply(rawtitle : String, rawauthor : String, path : String) : Info =
+      new Info(Misc.buildOptionalString(rawtitle), Misc.buildOptionalString(rawauthor), path){}
+
+  }
+  // }}}
+
 
   def getFileInfoOpt(file : File) : Option[Info] = {
     val parser = new PDFParser()
@@ -52,12 +52,10 @@ path: ${path}"""
     } else {
       try {
         iostream = new FileInputStream(file)
-        val _ = parser.parse(iostream, handler, metadata, ctx)
-
+        parser.parse(iostream, handler, metadata, ctx)
         val title = metadata.get(PDF.DOC_INFO_TITLE)
         val creator = metadata.get(PDF.DOC_INFO_CREATOR)
-
-        Some(Info(buildOptionalString(title), buildOptionalString(creator), filepath))
+        Some(Info(title, creator, filepath))
       } catch {
         case e : Throwable => {
           System.err.println(filepath, e.getMessage())
@@ -71,7 +69,6 @@ path: ${path}"""
 
   def traverseDirectory(dirName : String) : List[Info] = {
     val dirName_ = dirName.replaceFirst("^~",System.getProperty("user.home"))
-
     val parser = new PDFParser()
     val ctx = new ParseContext()
     val handler = new WriteOutContentHandler(-1)
@@ -79,9 +76,9 @@ path: ${path}"""
     val dir = new File(dirName_)
 
     if (dir.exists && dir.isDirectory) {
-      val files = dir.listFiles.filter(_.isFile).toList
-
-      files.map(file => getFileInfoOpt(file)).flatten
+      dir.listFiles.filter(_.isFile)
+        .toList.map(file => getFileInfoOpt(file))
+        .flatten
     } else {
       throw new IOException(s"${dirName} is not directory or not exist")
     }
