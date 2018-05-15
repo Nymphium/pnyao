@@ -1,6 +1,6 @@
 package com.github.nymphium.pnyao
 
-import java.io.{File, FileInputStream, FileWriter, InputStream, PrintWriter,IOException}
+import java.io.{File, FileInputStream, InputStream,IOException}
 import scala.collection.JavaConversions._
 import org.apache.commons.io.{FileUtils, FilenameUtils, IOUtils}
 import org.apache.tika.exception._
@@ -59,17 +59,13 @@ path: ${path}"""
 
         Some(Info(buildOptionalString(title), buildOptionalString(creator), filepath))
       } catch {
-        case e : TikaException => {
-          println(filepath, e.getMessage())
+        case e : Throwable => {
+          System.err.println(filepath, e.getMessage())
           None
         }
-        case e : IOException => {
-          println(filepath, e.getMessage())
-          None
-        }
-        } finally {
-          IOUtils.closeQuietly(iostream)
-        }
+      } finally {
+        IOUtils.closeQuietly(iostream)
+      }
     }
   }
 
@@ -91,3 +87,4 @@ path: ${path}"""
     }
   }
 }
+
