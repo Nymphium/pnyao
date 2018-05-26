@@ -1,87 +1,138 @@
 package com.github.nymphium.pnyao
 
-import java.io.{File, FileInputStream, InputStream,IOException}
+import java.io.{
+  File,
+  FileInputStream,
+  FileOutputStream,
+  InputStream,
+  IOException
+}
 import scala.collection.JavaConversions._
-import org.apache.commons.io.{FileUtils, FilenameUtils, IOUtils}
-import org.apache.tika.exception._
-import org.apache.tika.metadata.Metadata
-import org.apache.tika.metadata.PDF
-import org.apache.tika.parser.ParseContext
-import org.apache.tika.parser.pdf.PDFParser
-import org.apache.tika.sax.WriteOutContentHandler
+import org.apache.commons.io.{FilenameUtils, IOUtils}
+import com.itextpdf.text.pdf.{PdfReader, PdfWriter, PdfStamper}
 
-private object Misc {
-  def isMeaningfulString : String => Boolean =
-    _ match {
-      case null | "" => false
-      case _ => true
-    }
+private object StrUtils {
+  private def isMeaningfulString: String => Boolean = {
+    case null | "" => false
+    case _         => true
+  }
 
-  def buildOptionalString(s : String) : Option[String] =
+  def build(s: String): Option[String] =
     if (isMeaningfulString(s)) Some(s)
     else None
 }
 
 object Pnyao {
-  // Info: pdf information data structure {{{
-  sealed abstract case class Info(title : Option[String], author : Option[String], path : String) {
-    override def toString() =
-      s"""title: ${title match {case None => "-" case Some(s) => s}}
-          author: ${author match {case None => "-" case Some(s) => s}}
-          path: ${path}""".replaceAll("""\n\s*""", "\n")
+  // initialize PdfReader
+  PdfReader.unethicalreading = true
+
+  private object PdfTag {
+    def TITLE = "Title"
+    def AUTHOR = "Author"
   }
 
-  object Info {
-    def apply(rawtitle : String, rawauthor : String, path : String) : Info =
-      new Info(Misc.buildOptionalString(rawtitle), Misc.buildOptionalString(rawauthor), path){}
+  // Tag: wrapper of Set[String]; to categorize an info {{{
+  protected final class Tag() {
+    protected var tags: Set[String] = Set()
 
+    def apply() = tags
+
+    override def toString(): String =
+      tags.fold("") { _ + ", " + _ }.replaceFirst(", ", "")
+
+    def +=(tag: String*) = tags ++= tag
+    def -=(tag: String) = tags -= tag
+    def <-?(tag: String) = tags(tag)
   }
   // }}}
 
+  // memo for info content {{{
+  protected final class Memo() {
+    protected var memo = ""
 
-  def getFileInfoOpt(file : File) : Option[Info] = {
-    val parser = new PDFParser()
-    val ctx = new ParseContext()
-    val handler = new WriteOutContentHandler(-1)
-    val metadata = new Metadata()
+    def apply() = memo
 
-    var iostream : InputStream = null
-    val filepath = file.getAbsolutePath()
+    override def toString() = memo
+
+    def update(newmemo: String): Unit = memo = newmemo
+  }
+  // }}}
+
+  // Info: pdf information data structure {{{
+  class Info(var title: Option[String],
+             var author: Option[String],
+             path: String) {
+    val tag = new Tag()
+    val memo = new Memo()
+
+    override def toString() =
+      s"""title: ${title match {
+        case None    => "-"
+        case Some(s) => s
+      }}
+          author: ${author match {
+        case None    => "-"
+        case Some(s) => s
+      }}
+          path: ${path}
+          tags: ${tag}
+          memo: ${memo}"""
+        .replaceAll("""\n\s*""", "\n")
+
+    def unapply(): (Option[String], Option[String], String) =
+      (title, author, path)
+
+    def setTitle(newtitle: String): Unit = {
+      title = StrUtils.build(newtitle)
+    }
+
+    def setAuthor(newauthor: String): Unit = {
+      author = StrUtils.build(newauthor)
+    }
+  }
+  // }}}
+
+  private def getInfoOpt(filepath: String): Option[Info] = {
+    val tmp = File.createTempFile("pnyaotmp", ".pdf")
+
     if (FilenameUtils.getExtension(filepath).matches("^(?!.*pdf$).*$")) {
       None
     } else {
       try {
-        iostream = new FileInputStream(file)
-        parser.parse(iostream, handler, metadata, ctx)
-        val title = metadata.get(PDF.DOC_INFO_TITLE)
-        val creator = metadata.get(PDF.DOC_INFO_CREATOR)
-        Some(Info(title, creator, filepath))
+        val reader = new PdfReader(filepath)
+        val stamper = new PdfStamper(reader, new FileOutputStream(tmp))
+
+        val info = reader.getInfo
+
+        val title = StrUtils.build(info.get(PdfTag.TITLE))
+        val creator = StrUtils.build(info.get(PdfTag.AUTHOR))
+
+        stamper.close
+        reader.close
+
+        Some(new Info(title, creator, filepath))
       } catch {
-        case e : Throwable => {
-          System.err.println(filepath, e.getMessage())
+        case e: Throwable => {
+          System.err.println(filepath, e.getMessage)
           None
         }
       } finally {
-        IOUtils.closeQuietly(iostream)
+        tmp.delete()
       }
     }
   }
 
-  def traverseDirectory(dirName : String) : List[Info] = {
-    val dirName_ = dirName.replaceFirst("^~",System.getProperty("user.home"))
-    val parser = new PDFParser()
-    val ctx = new ParseContext()
-    val handler = new WriteOutContentHandler(-1)
-    val metadata = new Metadata()
-    val dir = new File(dirName_)
+  def traverseDirectory(dirName: String): List[Info] = {
+    val dir = new File(dirName)
 
     if (dir.exists && dir.isDirectory) {
-      dir.listFiles.filter(_.isFile)
-        .toList.map(file => getFileInfoOpt(file))
+      dir.listFiles
+        .filter(_.isFile)
+        .toList
+        .map(file => getInfoOpt(file.getAbsolutePath))
         .flatten
     } else {
-      throw new IOException(s"${dirName} is not directory or not exist")
+      throw new IOException(s"${dirName} is not a directory or not exist")
     }
   }
 }
-
