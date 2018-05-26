@@ -7,30 +7,26 @@ import java.io.{
   FileOutputStream,
   IOException
 }
-
 import scala.collection.JavaConversions._
 import scala.io.Source
 import org.apache.commons.io.{FilenameUtils, IOUtils}
 import com.itextpdf.text.pdf.{PdfReader, PdfWriter, PdfStamper}
 import io.circe._, io.circe.syntax._, io.circe.generic.auto._
 
-
 object Files {
+  // pnyao database with manipulation {{{
   protected var dbPath = "~/.pnyaodb"
   def getDBPath() = dbPath.replaceAll("~", System.getProperty("user.home"))
   def setDBPath(newpath: String) = { dbPath = newpath }
+  // }}}
 
-  case class DirnInfo(dir : String, infos : List[Pnyao.Info])
+  // tuple (travarsed path, list of info)
+  type DirnInfo = (String, List[Info])
 
   // initialize PdfReader
-  PdfReader.unethicalreading = true
+  val _ = { PdfReader.unethicalreading = true }
 
-  private object PdfTag {
-    def TITLE = "Title"
-    def AUTHOR = "Author"
-  }
-
-  private def getInfoOpt(filepath: String): Option[Pnyao.Info] = {
+  private def getInfoOpt(filepath: String): Option[Info] = {
     val tmp = File.createTempFile("pnyaotmp", ".pdf")
 
     if (FilenameUtils.getExtension(filepath).matches("^(?!.*pdf$).*$")) {
@@ -39,16 +35,12 @@ object Files {
       try {
         val reader = new PdfReader(filepath)
         val stamper = new PdfStamper(reader, new FileOutputStream(tmp))
-
-        val info = reader.getInfo
-
-        val title = Common.StrUtils.build(info.get(PdfTag.TITLE))
-        val creator = Common.StrUtils.build(info.get(PdfTag.AUTHOR))
+        val rawinfo = reader.getInfo
 
         stamper.close
         reader.close
 
-        Some(new Pnyao.Info(title, creator, filepath))
+        Some(Info(rawinfo.get("Title"), rawinfo.get("Author"), filepath))
       } catch {
         case e: Throwable => {
           System.err.println(filepath, e.getMessage)
@@ -60,7 +52,11 @@ object Files {
     }
   }
 
-  def traverseDirectory(dirName: String): List[Pnyao.Info] = {
+  /*
+   * traverse directory(depth=1);
+   * whether the path is absolute or not relies on the caller
+   */
+  def traverseDirectory(dirName: String): List[Info] = {
     val dir = new File(dirName)
 
     if (dir.exists && dir.isDirectory) {
@@ -74,25 +70,45 @@ object Files {
     }
   }
 
-  // TODO: read db and update
-  def writeToDB(targetPath : String, infos : List[Pnyao.Info]) = {
-    new PrintWriter(getDBPath) {
-      val obj = DirnInfo(targetPath, infos)
-      write(obj.asJson.noSpaces)
-      close
+  // database manipulation {{{
+  def writeToDB(targetPath: String, newcontent: List[Info]) = {
+    val file = new File(getDBPath)
+    var changed = false
+    val newls = {
+      if (!file.exists) {
+        file.createNewFile
+        changed = true
+        List((targetPath, newcontent))
+      } else {
+        readDB match {
+          case Right(ls) => {
+            changed = true
+            (targetPath, newcontent) :: ls.filter(_._1 != targetPath)
+          }
+          case Left(_) => List()
+        }
+      }
+    }
+
+    if (changed) {
+      new PrintWriter(file) {
+        write(newls.asJson.noSpaces)
+        close
+      }
     }
   }
 
-  def readDB() : Either[io.circe.Error, DirnInfo] = {
-    val db = getDBPath
-    val dbcontent = Source.fromFile(db).getLines.mkString
-    parser.decode[DirnInfo](dbcontent)
+  def readDB(): Either[io.circe.Error, List[DirnInfo]] = {
+    parser.decode[List[DirnInfo]](Source.fromFile(getDBPath).getLines.mkString)
   }
 
+  // for conversion from/to JSON   {{{
   implicit val encodeDirnInfo: Encoder[DirnInfo] =
-    Encoder.forProduct2("path", "contents")(c => (c.dir, c.infos))
+    Encoder.forProduct2("path", "contents")(c => (c._1, c._2))
 
   implicit val decodeDirnInfo: Decoder[DirnInfo] =
-    Decoder.forProduct2("path", "contents")(DirnInfo.apply)
+    Decoder.forProduct2("path", "contents")(
+      Tuple2.apply: (String, List[Info]) => DirnInfo)
+  //   }}}
+  // }}}
 }
-

@@ -1,6 +1,5 @@
-package com.github.nymphium.pnyao
-
 import io.circe.syntax._
+import com.github.nymphium.pnyao._
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -8,14 +7,18 @@ object Main {
       var absPath = args(0)
       absPath = absPath.replaceAll("~", System.getProperty("user.home"))
 
-      val info: List[Pnyao.Info] = Files.traverseDirectory(absPath)
-      info.map { info =>
-        info.tag += "aaa"
-        info.memo update "OK"
-        println(info.asJson)
-      }
+      val info: List[Info] = Files.traverseDirectory(absPath)
+      // info.map { info =>
+        // info.tag += "aaa"
+        // info.memo update "OK"
+        // println(info.asJson)
+      // }
 
       Files.writeToDB(absPath, info)
+      Files.readDB match {
+        case Right(l) => println(l)
+        case Left(_) => ()
+      }
 
       ()
     } else {
@@ -23,3 +26,4 @@ object Main {
     }
   }
 }
+
