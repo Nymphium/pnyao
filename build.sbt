@@ -8,3 +8,12 @@ libraryDependencies ++= Seq(
 		"commons-io" % "commons-io" % "2.5",
 		"org.bouncycastle" % "bcpkix-jdk15on" % "1.50"
 		)
+
+val circeVersion = "0.9.3"
+
+libraryDependencies ++= Seq(
+		"io.circe" %% "circe-core",
+		"io.circe" %% "circe-generic",
+		"io.circe" %% "circe-parser"
+		).map(_ % circeVersion)
+

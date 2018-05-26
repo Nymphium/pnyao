@@ -1,36 +1,9 @@
 package com.github.nymphium.pnyao
 
-import java.io.{
-  File,
-  FileInputStream,
-  FileOutputStream,
-  InputStream,
-  IOException
-}
-import scala.collection.JavaConversions._
-import org.apache.commons.io.{FilenameUtils, IOUtils}
-import com.itextpdf.text.pdf.{PdfReader, PdfWriter, PdfStamper}
-
-private object StrUtils {
-  private def isMeaningfulString: String => Boolean = {
-    case null | "" => false
-    case _         => true
-  }
-
-  def build(s: String): Option[String] =
-    if (isMeaningfulString(s)) Some(s)
-    else None
-}
+import io.circe._, io.circe.syntax._, io.circe.generic.auto._, io.circe.generic.semiauto._
+import com.github.nymphium.pnyao.Common.StrUtils
 
 object Pnyao {
-  // initialize PdfReader
-  PdfReader.unethicalreading = true
-
-  private object PdfTag {
-    def TITLE = "Title"
-    def AUTHOR = "Author"
-  }
-
   // Tag: wrapper of Set[String]; to categorize an info {{{
   protected final class Tag() {
     protected var tags: Set[String] = Set()
@@ -61,7 +34,7 @@ object Pnyao {
   // Info: pdf information data structure {{{
   class Info(var title: Option[String],
              var author: Option[String],
-             path: String) {
+             val path: String) {
     val tag = new Tag()
     val memo = new Memo()
 
@@ -90,49 +63,36 @@ object Pnyao {
       author = StrUtils.build(newauthor)
     }
   }
+
+  // for conversion from/to JSON {{{
+  implicit val encodeString: Encoder[String] = {
+    case null => Json.fromString("")
+    case s    => Json.fromString(s)
+  }
+
+  implicit val encodeTag: Encoder[Tag] = new Encoder[Tag] {
+    override def apply(t: Tag) = Json.fromString(t.toString)
+  }
+
+  implicit val encodeMemo: Encoder[Memo] = new Encoder[Memo] {
+    override def apply(m: Memo) = Json.fromString(m.toString)
+  }
+
+  implicit val encodeInfo: Encoder[Info] =
+    Encoder.forProduct5("title", "author", "path", "tag", "memo")(ii =>
+      (StrUtils.pure(ii.title), StrUtils.pure(ii.author), ii.path, ii.tag, ii.memo))
+
+  implicit val decodeInfo: Decoder[Info] =
+    Decoder.forProduct5("title", "author", "path", "tag", "memo")({
+      case (title, author, path, tag, memo) =>
+        val info = new Info(StrUtils.build(title),
+                            StrUtils.build(author),
+                            path)
+        info.tag += tag
+        info.memo update memo
+        info
+    }: (String, String, String, String, String) => Info)
+
+  //   }}}
   // }}}
-
-  private def getInfoOpt(filepath: String): Option[Info] = {
-    val tmp = File.createTempFile("pnyaotmp", ".pdf")
-
-    if (FilenameUtils.getExtension(filepath).matches("^(?!.*pdf$).*$")) {
-      None
-    } else {
-      try {
-        val reader = new PdfReader(filepath)
-        val stamper = new PdfStamper(reader, new FileOutputStream(tmp))
-
-        val info = reader.getInfo
-
-        val title = StrUtils.build(info.get(PdfTag.TITLE))
-        val creator = StrUtils.build(info.get(PdfTag.AUTHOR))
-
-        stamper.close
-        reader.close
-
-        Some(new Info(title, creator, filepath))
-      } catch {
-        case e: Throwable => {
-          System.err.println(filepath, e.getMessage)
-          None
-        }
-      } finally {
-        tmp.delete()
-      }
-    }
-  }
-
-  def traverseDirectory(dirName: String): List[Info] = {
-    val dir = new File(dirName)
-
-    if (dir.exists && dir.isDirectory) {
-      dir.listFiles
-        .filter(_.isFile)
-        .toList
-        .map(file => getInfoOpt(file.getAbsolutePath))
-        .flatten
-    } else {
-      throw new IOException(s"${dirName} is not a directory or not exist")
-    }
-  }
 }
