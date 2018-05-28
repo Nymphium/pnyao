@@ -85,7 +85,7 @@ object Files {
             changed = true
             (targetPath, newcontent) :: ls.filter(_._1 != targetPath)
           }
-          case Left(_) => List()
+          case _ => List()
         }
       }
     }
@@ -99,7 +99,15 @@ object Files {
   }
 
   def readDB(): Either[io.circe.Error, List[DirnInfo]] = {
-    parser.decode[List[DirnInfo]](Source.fromFile(getDBPath).getLines.mkString)
+    val file = new File(getDBPath)
+
+    parser.decode[List[DirnInfo]] {
+      if (file.exists) {
+        Source.fromFile(getDBPath).getLines.mkString
+      } else {
+        ""
+      }
+    }
   }
 
   // for conversion from/to JSON   {{{
