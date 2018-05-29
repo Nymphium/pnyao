@@ -1,0 +1,7 @@
+@(message: String)(implicit assetsFinder: AssetsFinder)
+
+@main("Pnyao", assetsFinder) {
+	<script src="@assetsFinder.path("javascripts/main.js")" type="text/javascript"></script>
+
+	@Html(message)
+}

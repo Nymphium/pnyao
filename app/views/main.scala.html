@@ -1,0 +1,11 @@
+@(title: String, assetsFinder: AssetsFinder)(content: Html)
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<title>@title</title>
+		<link rel="stylesheet" media="screen" href="@assetsFinder.path("stylesheets/main.css")">
+	</head>
+	<body>
+		@content
+	</body>
+</html>
