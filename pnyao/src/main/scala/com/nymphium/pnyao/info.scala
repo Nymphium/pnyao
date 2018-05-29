@@ -1,7 +1,10 @@
 package com.github.nymphium.pnyao
 
-import io.circe._, io.circe.syntax._, io.circe.generic.auto._,
-io.circe.generic.semiauto._
+import
+    io.circe._
+  , io.circe.syntax._
+  , io.circe.generic.auto._
+  , io.circe.generic.semiauto._
 
 // Tag: wrapper of Set[String]; to categorize an info {{{
 protected final class Tag() {
