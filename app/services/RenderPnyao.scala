@@ -1,10 +1,17 @@
 package services
 
-import scalatags.Text.TypedTag
-import scalatags.Text.all._
-import io.circe._, io.circe.syntax._, io.circe.generic.auto._
-import com.github.nymphium.pnyao.{Info, Files}
-import com.github.nymphium.pnyao.Files.DirnInfo
+import
+    com.github.nymphium.pnyao.{Info, Files}
+  , com.github.nymphium.pnyao.Files.DirnInfo
+
+import
+    io.circe._
+  , io.circe.syntax._
+  , io.circe.generic.auto._
+
+import
+    scalatags.Text.TypedTag
+  , scalatags.Text.all._
 
 object RenderPnyao {
   def infoAsBody(idx: Int, info: Info): TypedTag[String] = {

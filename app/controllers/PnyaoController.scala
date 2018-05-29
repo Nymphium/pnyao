@@ -1,9 +1,9 @@
 package controllers
 
 import
-  play.api.mvc._,
-  play.api.libs.json._,
-  play.api.libs.functional.syntax._
+    play.api.mvc._
+  , play.api.libs.json._
+  , play.api.libs.functional.syntax._
 
 import javax.inject._
 

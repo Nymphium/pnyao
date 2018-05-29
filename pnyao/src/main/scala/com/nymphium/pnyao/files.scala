@@ -3,15 +3,22 @@ package com.github.nymphium.pnyao
 import java.io.{
   PrintWriter,
   File,
-  FileInputStream,
   FileOutputStream,
   IOException
 }
-import scala.collection.JavaConversions._
-import scala.io.Source
-import org.apache.commons.io.{FilenameUtils, IOUtils}
+
+import org.apache.commons.io.FilenameUtils
+
+import
+    scala.collection.JavaConversions._
+  , scala.io.Source
+
 import com.itextpdf.text.pdf.{PdfReader, PdfWriter, PdfStamper}
-import io.circe._, io.circe.syntax._, io.circe.generic.auto._
+
+import
+    io.circe._
+   , io.circe.syntax._
+   , io.circe.generic.auto._
 
 object Files {
   // pnyao database with manipulation {{{

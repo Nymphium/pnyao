@@ -1,4 +1,3 @@
-console.log("aaa")
 document.addEventListener('DOMContentLoaded', () => {
 	Array.prototype.forEach.call(
 	document.querySelectorAll(".entry input"), (a) => {
@@ -9,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		idx: parseInt(t.getAttribute("idx")),
 		value: t.value
 	}
-	console.log(data);
 
 	const xhr = new XMLHttpRequest();
 	xhr.open('POST', '/update', true);
