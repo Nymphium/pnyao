@@ -1,0 +1,5 @@
+GET    /                           controllers.HomeController.index
+POST   /update                     controllers.PnyaoController.foo
+
+GET    /assets/*file               controllers.Assets.versioned(file)
+

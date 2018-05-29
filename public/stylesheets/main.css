@@ -1,0 +1,41 @@
+html {
+  font-family: "sans serif";
+  font-size: 10pt;
+}
+
+input {
+  background: white;
+  color: black;
+  font-size: 10pt;
+}
+
+.entry {
+  display: table-row;
+  width: 100%;
+}
+
+.entry * {
+  display: table-cell;
+  padding: 3px 10px;
+  border: 1px solid #999999;
+}
+
+.entry:nth-child(even) {
+  background:gray;
+  color: white;
+}
+
+.entry:nth-child(even) input {
+  background: gray;
+  color: white;
+}
+
+input:hover {
+  background: yellow;
+}
+
+.entry:nth-child(even) input:hover {
+  background: yellow;
+  color: black;
+}
+
