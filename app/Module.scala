@@ -1,9 +1,10 @@
-import
-    play.api.{Configuration, Environment}
-  , play.api.inject.Module
+import com.google.inject.AbstractModule
+import com.google.inject.name.Names
+import services.{Pnyao, PnyaoService}
 
-class ExModule extends Module {
-  override def bindings(env: Environment, conf : Configuration) = {
-    Seq()
+class Module extends AbstractModule {
+  def configure() = {
+    bind(classOf[PnyaoService])
+      .to(classOf[Pnyao]).asEagerSingleton()
   }
 }
