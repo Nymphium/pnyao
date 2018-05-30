@@ -1,18 +1,79 @@
 package services
 
-import scalatags.Text.TypedTag
-import scalatags.Text.all._
-import io.circe._, io.circe.syntax._, io.circe.generic.auto._
-import com.github.nymphium.pnyao.{Files, Info}
-import com.github.nymphium.pnyao.Files.DirnInfo
+import
+    scala.concurrent.Future
+  , scala.collection.mutable.Buffer
 
-object Pnyao {
-  private var db = Files.readDB getOrElse List()
+import javax.inject._
 
+import
+    play.api.Logger
+  , play.api.inject.ApplicationLifecycle
+
+import
+    scalatags.Text.TypedTag
+  , scalatags.Text.all._
+
+import
+    com.github.nymphium.pnyao.{Files, Info}
+  , com.github.nymphium.pnyao.Files.DirnInfo
+
+import
+    io.circe._
+  , io.circe.syntax._
+  , io.circe.generic.auto._
+
+trait PnyaoService {
+  def getDB(): Buffer[Files.DirnInfo]
+  def updateInfo(`type`: String, idx: Int, parent: String, value: String): Unit
+}
+
+@Singleton
+class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
+  private var db = (Files.readDB getOrElse Seq()).toBuffer
+  private var updated = false
   def getDB() = db
-  def setDB(items: List[DirnInfo]) = {
-    items foreach { case (path, info) => Files.writeToDB(path, info) }
+
+  // hook to write new data to DB
+  {
+    Logger.info("add stop hook ")
+
+    lifeCycle.addStopHook { () =>
+      if (updated) {
+        db foreach { case (path, contents) =>
+          Files.writeToDB(path, contents)
+        }
+        Logger.info("write to DB")
+      }
+
+      Future.successful(())
+    }
   }
 
-  def foo(aaa: String) = println(aaa)
+  def updateInfo(`type`: String,
+                 idx: Int,
+                 parent: String,
+                 value: String): Unit = {
+
+    val dbIdx = db.zipWithIndex.filter { _._1._1 == parent }(0)._2
+    val entry = db(dbIdx)._2.toBuffer
+    val info = entry(idx)
+    var newval: Option[String] = None
+    `type` match {
+      case "title"  => { info.setTitle(value); newval = info.title }
+      case "author" => { info.setAuthor(value); newval = info.author }
+      case "memo"   => {
+        info.memo.update(value); newval = Some(info.memo.toString)
+      }
+      case "tag"    => { info.tag += value; newval = Some(info.tag.toString) }
+      case _        => ()
+    }
+
+    newval map { newval =>
+      updated = true
+      Logger.info(s"update ${`type`} to `${newval}'")
+      entry.update(idx, info)
+      db.update(dbIdx, (parent, entry.toSeq))
+    }
+  }
 }

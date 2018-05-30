@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const data = {
 		type: t.getAttribute("class"),
 		idx: parseInt(t.getAttribute("idx")),
+		parent: t.parentNode.parentNode.getAttribute("path"),
 		value: t.value
 	}
 

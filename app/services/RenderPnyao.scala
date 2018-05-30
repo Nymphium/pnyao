@@ -59,7 +59,7 @@ object RenderPnyao {
     )
   }
 
-  def render(contents: List[Files.DirnInfo]): TypedTag[String] = {
+  def render(contents: Seq[Files.DirnInfo]): TypedTag[String] = {
     div(`class` := "renderedBody")(
       contents.map(dirnInfoAsBody)
     )

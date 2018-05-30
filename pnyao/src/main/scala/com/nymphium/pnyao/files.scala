@@ -4,8 +4,11 @@ import java.io.{
   PrintWriter,
   File,
   FileOutputStream,
-  IOException
+  IOException,
+  ByteArrayOutputStream
 }
+
+import java.nio.file.{Files => NIOFiles, StandardCopyOption, StandardOpenOption, Paths}
 
 import org.apache.commons.io.FilenameUtils
 
@@ -14,6 +17,7 @@ import
   , scala.io.Source
 
 import com.itextpdf.text.pdf.{PdfReader, PdfWriter, PdfStamper}
+import com.itextpdf.text.xml.xmp.XmpWriter
 
 import
     io.circe._
@@ -28,11 +32,12 @@ object Files {
   // }}}
 
   // tuple (travarsed path, list of info)
-  type DirnInfo = (String, List[Info])
+  type DirnInfo = (String, Seq[Info])
 
   // initialize PdfReader
   val _ = { PdfReader.unethicalreading = true }
 
+  // get/set pdf info {{{
   private def getInfoOpt(filepath: String): Option[Info] = {
     val tmp = File.createTempFile("pnyaotmp", ".pdf")
 
@@ -54,22 +59,47 @@ object Files {
           None
         }
       } finally {
-        tmp.delete()
+        tmp.delete
       }
     }
   }
+
+  private def setInfo(info: Info): Unit = {
+    val tmp = NIOFiles.createTempFile("pnyaotmp", ".pdf")
+    val filepath = info.path
+
+    val out = NIOFiles.newOutputStream(tmp)
+    val reader = new PdfReader(filepath)
+    val stamper = new PdfStamper(reader, out)
+    val rawinfo = reader.getInfo
+
+    info.title.map { rawinfo.put("Title", _) }
+    info.author.map { rawinfo.put("Author", _) }
+    stamper.setMoreInfo(rawinfo)
+    val baos = new ByteArrayOutputStream()
+    val xmp = new XmpWriter(baos, rawinfo)
+    xmp.close
+    stamper.setXmpMetadata(baos.toByteArray())
+
+    stamper.close
+    reader.close
+    NIOFiles.copy(tmp, Paths.get(filepath), StandardCopyOption.REPLACE_EXISTING)
+    out.close
+    NIOFiles.delete(tmp)
+  }
+  // }}}
 
   /*
    * traverse directory(depth=1);
    * whether the path is absolute or not relies on the caller
    */
-  def traverseDirectory(dirName: String): List[Info] = {
+  def traverseDirectory(dirName: String): Seq[Info] = {
     val dir = new File(dirName)
 
     if (dir.exists && dir.isDirectory) {
       dir.listFiles
         .filter(_.isFile)
-        .toList
+        .toSeq
         .map(file => getInfoOpt(file.getAbsolutePath))
         .flatten
     } else {
@@ -77,22 +107,22 @@ object Files {
     }
   }
 
-  // database manipulation {{{
-  def writeToDB(targetPath: String, newcontent: List[Info]) = {
+  // database manipulation
+  def writeToDB(targetPath: String, newcontent: Seq[Info]) = {
     val file = new File(getDBPath)
     var changed = false
     val newls = {
       if (!file.exists) {
         file.createNewFile
         changed = true
-        List((targetPath, newcontent))
+        Seq((targetPath, newcontent))
       } else {
         readDB match {
           case Right(ls) => {
             changed = true
-            (targetPath, newcontent) :: ls.filter(_._1 != targetPath)
+            (targetPath, newcontent) +: ls.filter(_._1 != targetPath)
           }
-          case _ => List()
+          case _ => Seq()
         }
       }
     }
@@ -102,28 +132,31 @@ object Files {
         write(newls.asJson.noSpaces)
         close
       }
+
+      newcontent foreach setInfo
     }
   }
 
-  def readDB(): Either[io.circe.Error, List[DirnInfo]] = {
+  def readDB(): Either[io.circe.Error, Seq[DirnInfo]] = {
     val file = new File(getDBPath)
 
-    parser.decode[List[DirnInfo]] {
+    parser.decode[Seq[DirnInfo]] {
       if (file.exists) {
         Source.fromFile(getDBPath).getLines.mkString
       } else {
         ""
       }
     }
+
+    // TODO: check consistency between files and DB
   }
 
-  // for conversion from/to JSON   {{{
+  // for conversion from/to JSON {{{
   implicit val encodeDirnInfo: Encoder[DirnInfo] =
     Encoder.forProduct2("path", "contents")(c => (c._1, c._2))
 
   implicit val decodeDirnInfo: Decoder[DirnInfo] =
     Decoder.forProduct2("path", "contents")(
-      Tuple2.apply: (String, List[Info]) => DirnInfo)
-  //   }}}
+      Tuple2.apply: (String, Seq[Info]) => DirnInfo)
   // }}}
 }
