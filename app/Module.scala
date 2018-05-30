@@ -5,6 +5,6 @@ import services.{Pnyao, PnyaoService}
 class Module extends AbstractModule {
   def configure() = {
     bind(classOf[PnyaoService])
-      .to(classOf[Pnyao]).asEagerSingleton()
+      .to(classOf[Pnyao])
   }
 }

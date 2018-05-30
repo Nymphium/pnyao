@@ -35,19 +35,20 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
   def getDB() = db
 
   // hook to write new data to DB
-  {
-    Logger.info("add stop hook ")
-
-    lifeCycle.addStopHook { () =>
-      if (updated) {
+  private def work() = {
+     if (updated) {
         db foreach { case (path, contents) =>
           Files.writeToDB(path, contents)
         }
         Logger.info("write to DB")
       }
+  }
 
-      Future.successful(())
-    }
+  {
+    Logger.info("add stop hook ")
+
+    lifeCycle.addStopHook { () => work(); Future.successful(()) }
+    sys.addShutdownHook( work )
   }
 
   def updateInfo(`type`: String,
