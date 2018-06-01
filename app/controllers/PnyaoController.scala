@@ -1,5 +1,7 @@
 package controllers
 
+import scala.concurrent.Future
+
 import
     play.api.Logger
   , play.api.mvc._
@@ -19,19 +21,18 @@ class PnyaoController @Inject()(cc: ControllerComponents, pnyao: services.Pnyao)
     (JsPath \ "value").read[String]
   )(UpTup.apply(_, _, _, _))
 
-  def foo = Action(parse.json) { request =>
+  def update = Action.async(parse.json) { request =>
     request.body
       .validate[UpTup]
       .fold(
-        errors => {
-          BadRequest(
-            Json.obj("status" -> "KO", "message" -> JsError.toJson(errors)))
-        },
-        uptup => {
-          val UpTup(typ, idx, parent, value) = uptup
+        errors => Future.failed(new Exception(errors.toString)),
+        {case UpTup(typ, idx, parent, value) => {
           pnyao.updateInfo(typ, idx, parent, value)
-          Ok(Json.obj("status" -> "OK", "message" -> uptup.toString))
-        }
+          Future.successful(
+            Ok(Json.obj(
+              "status" -> "OK",
+              "message" -> UpTup(typ, idx, parent, value).toString)))
+        }}
       )
   }
 }

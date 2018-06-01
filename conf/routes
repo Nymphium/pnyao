@@ -1,5 +1,7 @@
 GET    /                           controllers.HomeController.index
-POST   /update                     controllers.PnyaoController.foo
+POST   /update                     controllers.PnyaoController.update
+GET    /open/:href                 controllers.OpenController.open(href: String)
+GET    /add/:path                  controllers.AddEntryCounter.add(path: String)
 
 GET    /assets/*file               controllers.Assets.versioned(file)
 

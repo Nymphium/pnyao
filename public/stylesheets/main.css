@@ -9,15 +9,19 @@ input {
   font-size: 10pt;
 }
 
-.entry {
+.entry, .entry-label {
   display: table-row;
   width: 100%;
 }
 
-.entry * {
+.entry *, .entry-label * {
   display: table-cell;
   padding: 3px 10px;
   border: 1px solid #999999;
+}
+
+.entry-label * {
+  background: #b3db8d;
 }
 
 .entry:nth-child(even) {
@@ -30,12 +34,17 @@ input {
   color: white;
 }
 
-input:hover {
+.entry input:hover {
   background: yellow;
 }
 
 .entry:nth-child(even) input:hover {
   background: yellow;
   color: black;
+}
+
+.pseudo-a:hover {
+  text-decoration: underline;
+  color: blue;
 }
 

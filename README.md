@@ -4,19 +4,28 @@ Pnyao
 Pnyao is a pdf management tool
 
 ## usage[alpha versoin]
+### ready
+run server and go http://localhost:9000
+
 ```
-$ sbt
-...
-[sbt] console
-[sbt console] import com.github.nymphium.pnyao.Files
-[sbt console] val path = "/path/to/dir" // where pdf files are located
-[sbt console] val contents = Files.traverseDirectory(path) // read PDFs information
-[sbt console] Files.writeToDB(path, contents) // write information to DB, which is JSON file located at `~/.pnyaodb` by default
-[sbt console] :quit
-[sbt] run
+$ sbt run
 ```
 
-now you can access http://localhost:9000 to see and modify PDFs information
+### set
+Put a directory name and click "add" button
+
+![add entry](doc/img/entry.png)
+
+### go
+There are displayed contents. 
+You can change title/author metadata from the page and add memo, tag(, which is WIP).
+
+![new contents](doc/img/newcontents.png)
+
+### WIP functions
+- tag
+- delete entry from DB
+- UI
 
 # license
 MIT
