@@ -32,6 +32,8 @@ class AddEntryCounter @Inject()(cc: ControllerComponents, pnyao: services.Pnyao)
       } else {
         val content = Files.traverseDirectory(dpath)
 
+        pnyao.addDB(dpath, content)
+
         // TODO: response渡してからdbに書き込んだりしたい
         Ok(Json.obj("status" -> "OK", "message" -> RenderPnyao.dirnInfoAsBody(dpath, content).toString))
       }
