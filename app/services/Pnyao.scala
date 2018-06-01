@@ -33,6 +33,7 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
   private var db = (Files.readDB getOrElse Seq()).toBuffer
   private var updated = false
   def getDB() = db
+  def addDB(path: String, contents: Seq[Info]) = db = (path, contents) +: db
 
   // hook to write new data to DB
   private def work() = {
