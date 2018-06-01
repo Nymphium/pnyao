@@ -1,20 +1,18 @@
 package services
 
-import
-    com.github.nymphium.pnyao.{Info, Files}
-  , com.github.nymphium.pnyao.Files.DirnInfo
+import java.net.URLEncoder, java.nio.file.Paths
 
-import
-    io.circe._
-  , io.circe.syntax._
-  , io.circe.generic.auto._
+import com.github.nymphium.pnyao.{Info, Files},
+com.github.nymphium.pnyao.Files.DirnInfo
 
-import
-    scalatags.Text.TypedTag
-  , scalatags.Text.all._
+import io.circe._, io.circe.syntax._, io.circe.generic.auto._
+
+import scalatags.Text.TypedTag, scalatags.Text.all._
 
 object RenderPnyao {
   def infoAsBody(idx: Int, info: Info): TypedTag[String] = {
+    val path = Paths.get(info.path)
+
     div(`class` := "entry", id := info.path)(
       Seq(
         span(`class` := "index", idx),
@@ -31,14 +29,21 @@ object RenderPnyao {
               attr("idx") := idx,
               `type` := "text",
               value := info.memo.toString),
-        span(`class` := "path", info.path)
+        // avoid Play to decode
+        a(
+          `class` := "path pseudo-a",
+          href := s"/open/${URLEncoder
+            .encode(URLEncoder.encode(path.toString, "UTF-8"), "UTF-8")}",
+          target := "_blank",
+          path.getFileName.toString
+        )
       ))
   }
 
   def dirnInfoAsBody(d: Files.DirnInfo): TypedTag[String] = {
     div(`class` := "direntry", attr("path") := d._1)(
-      h1(d._1),
-      div(`class` := "entry label")(
+      h1(d._1), button(`type`:="button", attr("path") := d._1, `class`:="delete", "delete from DB"),
+      div(`class` := "entry-label")(
         span(`class` := "index", "index"),
         input(`class` := "title",
               `type` := "text",
@@ -60,7 +65,7 @@ object RenderPnyao {
   }
 
   def render(contents: Seq[Files.DirnInfo]): TypedTag[String] = {
-    div(`class` := "renderedBody")(
+    div(`id` := "renderField")(
       contents.map(dirnInfoAsBody)
     )
   }
