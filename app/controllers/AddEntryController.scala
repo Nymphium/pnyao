@@ -16,7 +16,7 @@ import services.RenderPnyao
 
 
 @Singleton
-class AddEntryCounter @Inject()(cc: ControllerComponents, pnyao: services.Pnyao)
+class AddEntryController @Inject()(cc: ControllerComponents, pnyao: services.Pnyao)
     extends AbstractController(cc) {
   def add(path: String) = Action {
     val dpath = URLDecoder.decode(path, "UTF-8")
