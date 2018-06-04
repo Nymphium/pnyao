@@ -1,8 +1,8 @@
-GET    /                           controllers.HomeController.index
-POST   /update                     controllers.PnyaoController.update
-GET    /open/:href                 controllers.OpenController.open(href: String)
-GET    /add/:path                  controllers.AddEntryController.add(path: String)
-GET    /delete/:path               controllers.DeleteEntryController.delete(path: String)
+GET    /                           controllers.PnyaoController.index
+POST   /update                     controllers.PnyaoController.updateInfo
+GET    /open/:href                 controllers.PnyaoController.openPDF(href: String)
+GET    /add/:path                  controllers.PnyaoController.addEntry(path: String)
+GET    /delete/:path               controllers.PnyaoController.deleteEntry(path: String)
 
 GET    /assets/*file               controllers.Assets.versioned(file)
 
