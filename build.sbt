@@ -3,7 +3,6 @@ version := "1.0-SNAPSHOT"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 scalaVersion := "2.12.5"
-crossScalaVersions := Seq("2.11.12", "2.12.4")
 
 val circeVersion = "0.9.3"
 libraryDependencies ++= Seq(

@@ -7,13 +7,15 @@ com.github.nymphium.pnyao.Files.DirnInfo
 
 import io.circe._, io.circe.syntax._, io.circe.generic.auto._
 
+import play.api.Logger
+
 import scalatags.Text.TypedTag, scalatags.Text.all._
 
 object RenderPnyao {
   def infoAsBody(idx: Int, info: Info): TypedTag[String] = {
     val path = Paths.get(info.path)
 
-    div(`class` := "entry", id := info.path)(
+    div(`class` := "entry", attr("path") := info.path)(
       Seq(
         span(`class` := "index", idx),
         input(`class` := "title",
@@ -24,14 +26,19 @@ object RenderPnyao {
               attr("idx") := idx,
               `type` := "text",
               value := info.author.getOrElse("").toString),
-        span(`class` := "tag", info.tag.toString),
-        input(`class` := "memo",
+        span(`class` := "tag")(
+          span(`class`:="tag0 add", "+")
+          ,
+          info.tag().map {c => Logger.info(c); span(`class`:="tag0", c) }.toSeq
+          ),
+        textarea(`class` := "memo",
               attr("idx") := idx,
-              `type` := "text",
-              value := info.memo.toString),
+              cols:="100",
+              rows:="100",
+              )(info.memo.toString),
         // avoid Play to decode
         a(
-          `class` := "path pseudo-a",
+          `class` := "path",
           href := s"/open/${URLEncoder
             .encode(URLEncoder.encode(path.toString, "UTF-8"), "UTF-8")}",
           target := "_blank",
@@ -41,26 +48,34 @@ object RenderPnyao {
   }
 
   def dirnInfoAsBody(d: Files.DirnInfo): TypedTag[String] = {
-    div(`class` := "direntry", attr("path") := d._1)(
-      h1(d._1), button(`type`:="button", attr("path") := d._1, `class`:="delete", "delete from DB"),
-      div(`class` := "entry-label")(
-        span(`class` := "index", "index"),
-        input(`class` := "title",
-              `type` := "text",
-              value := "title",
-              disabled := "disabled"),
-        input(`class` := "author",
-              `type` := "text",
-              value := "author",
-              disabled := "disabled"),
-        span(`class` := "tag", "tag"),
-        input(`class` := "memo",
-              `type` := "text",
-              value := "memo",
-              disabled := "disabled"),
-        span(`class` := "path", "path")
+    div(`class` := "direntry", attr("path") := d._1, attr("fold") := "false")(
+      div(`class` := "entryLabel")(
+        span(`class` := "label", d._1),
+        button(`type` := "button",
+               attr("path") := d._1,
+               `class` := "delete",
+               "delete from DB")
       ),
-      d._2.zipWithIndex.map { case (info, idx) => infoAsBody(idx, info) }
+      div(`class` := "content")(
+        div(`class` := "entry-label")(
+          span(`class` := "index", "index"),
+          input(`class` := "title",
+                `type` := "text",
+                value := "title",
+                disabled := "disabled"),
+          input(`class` := "author",
+                `type` := "text",
+                value := "author",
+                disabled := "disabled"),
+          span(`class` := "tag", "tag"),
+          input(`class` := "memo",
+                `type` := "text",
+                value := "memo",
+                disabled := "disabled"),
+          span(`class` := "path", "path")
+        ),
+        d._2.zipWithIndex.map { case (info, idx) => infoAsBody(idx, info) }
+      )
     )
   }
 
