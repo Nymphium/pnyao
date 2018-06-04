@@ -8,28 +8,32 @@ import
 
 // Tag: wrapper of Set[String]; to categorize an info {{{
 protected final class Tag() {
-  protected var tags: Set[String] = Set()
+  private var tags: Set[String] = Set()
+  private var updated = false
+  def isUpdated() = updated
 
   def apply() = tags
 
   override def toString(): String =
     tags.fold("") { _ + ", " + _ }.replaceFirst(", ", "")
 
-  def +=(tag: String*) = tags ++= tag
-  def -=(tag: String) = tags -= tag
+  def +=(tag: String*) = {tags ++= tag; updated = true}
+  def -=(tag: String) = {tags -= tag; updated = true}
   def <-?(tag: String) = tags(tag)
 }
 // }}}
 
 // memo for info content {{{
 protected final class Memo() {
-  protected var memo = ""
+  private var memo = ""
+  private var updated = false;
+  def isUpdated() = updated
 
   def apply() = memo
 
   override def toString() = memo
 
-  def update(newmemo: String): Unit = memo = newmemo
+  def update(newmemo: String): Unit = {memo = newmemo; updated = true}
 }
 // }}}
 
@@ -39,6 +43,9 @@ class Info(var title: Option[String],
            val path: String) {
   val tag = new Tag()
   val memo = new Memo()
+  private var updated = false
+
+  def isUpdated() = updated && tag.isUpdated && memo.isUpdated
 
   override def toString() =
     s"""title: ${title match {
@@ -59,10 +66,12 @@ class Info(var title: Option[String],
 
   def setTitle(newtitle: String): Unit = {
     title = StrUtils.build(newtitle)
+    updated = true
   }
 
   def setAuthor(newauthor: String): Unit = {
     author = StrUtils.build(newauthor)
+    updated = true
   }
 }
 
@@ -97,7 +106,7 @@ object Info {
     Decoder.forProduct5("title", "author", "path", "tag", "memo")({
       case (title, author, path, tag, memo) =>
         val info = new Info(StrUtils.build(title), StrUtils.build(author), path)
-        info.tag += tag
+        if(tag != "") {info.tag += tag}
         info.memo update memo
         info
     }: (String, String, String, String, String) => Info)

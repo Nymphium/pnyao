@@ -24,6 +24,10 @@ class OpenController @Inject()(cc: ControllerComponents, pnyao: services.Pnyao)
                fileToServe.path,
                StandardCopyOption.REPLACE_EXISTING)
     Logger.info(s"open ${it}")
-    Ok.sendFile(fileToServe.path.toFile, onClose = () => { fileToServe.delete })
+    Ok.sendFile(
+      content = fileToServe.path.toFile,
+      onClose = () => { fileToServe.delete }
+    )
   }
 }
+

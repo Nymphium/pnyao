@@ -2,6 +2,7 @@ GET    /                           controllers.HomeController.index
 POST   /update                     controllers.PnyaoController.update
 GET    /open/:href                 controllers.OpenController.open(href: String)
 GET    /add/:path                  controllers.AddEntryController.add(path: String)
+GET    /delete/:path               controllers.DeleteEntryController.delete(path: String)
 
 GET    /assets/*file               controllers.Assets.versioned(file)
 

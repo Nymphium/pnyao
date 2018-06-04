@@ -1,4 +1,5 @@
 name := "pyano"
+scalaVersion := "2.12.5"
 
 val circeVersion = "0.9.3"
 

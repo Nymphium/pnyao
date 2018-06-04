@@ -133,7 +133,9 @@ object Files {
         close
       }
 
-      newcontent foreach setInfo
+      newcontent foreach {info => 
+        if (info.isUpdated) setInfo(info)
+      }
     }
   }
 

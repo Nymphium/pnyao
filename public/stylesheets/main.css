@@ -1,50 +1,212 @@
-html {
-  font-family: "sans serif";
-  font-size: 10pt;
+.addEntry {
+	margin-bottom:1rem;
 }
 
-input {
-  background: white;
-  color: black;
-  font-size: 10pt;
+.entryLabel {
+	margin-bottom:1rem;
 }
 
-.entry, .entry-label {
-  display: table-row;
-  width: 100%;
+.entryLabel .label {
+	font-size:150%;
+	margin-right:1rem;
 }
 
-.entry *, .entry-label * {
-  display: table-cell;
-  padding: 3px 10px;
-  border: 1px solid #999999;
+.direntry {
+	margin-bottom:1rem;
 }
 
-.entry-label * {
-  background: #b3db8d;
-}
-
-.entry:nth-child(even) {
-  background:gray;
-  color: white;
-}
-
-.entry:nth-child(even) input {
-  background: gray;
-  color: white;
+.entry *,.entry-label * {
+	padding:3px 10px;
+	border:1px solid #999;
 }
 
 .entry input:hover {
-  background: yellow;
+	background:#ff0;
+}
+
+.entry textarea:hover {
+	background:#ff0;
+}
+
+.entry,.entry-label {
+	display:table-row;
+	width:100%;
+}
+
+.entry-label * {
+	background:#b3db8d;
+}
+
+.entry:nth-child(even) {
+	background:gray;
+	color:#fff;
+}
+
+.entry:nth-child(even) input {
+	background:gray;
+	color:#fff;
 }
 
 .entry:nth-child(even) input:hover {
-  background: yellow;
-  color: black;
+	background:#ff0;
+	color:#000;
 }
 
-.pseudo-a:hover {
-  text-decoration: underline;
-  color: blue;
+.entry:nth-child(even) textarea {
+	background:gray;
+	color:#fff;
+}
+
+.entry:nth-child(even) textarea:hover {
+	background:#ff0;
+	color:#000;
+}
+
+html {
+	font:10pt "sans serif";
+}
+
+input, textarea {
+	background:#fff;
+	color:#000;
+	font-size:10pt;
+	resize: none;
+}
+
+.direntry[fold="true"] .content {
+	display: none;
+}
+
+.direntry[fold="false"] .content {
+	display: block;
+}
+
+.direntry[fold="false"] .entryLabel .label:before {
+	content: '\025bc';
+}
+
+.direntry[fold="true"] .entryLabel .label:before {
+	content: '\025b6';
+}
+
+.content .title,
+.content .author,
+.content .tag,
+.content .memo,
+.content .path {
+	vertical-align: top;
+	width: 20rem;
+	height: 2.5rem;
+	display: inline-block;
+	white-space: nowrap;
+}
+
+.content .entry .title,
+.content .entry .author,
+.content .entry .tag,
+.content .entry .memo,
+.content .entry .path {
+	overflow-x: scroll;
+}
+
+.content .index {
+	display: inline-block;
+	width: 3rem;
+	height: 2.5rem;
+}
+
+.tag0 {
+	background: white;
+	color: black;
+}
+
+.tag0.add {
+	font-weight: bold;
+}
+
+/* mordal-window memo box */
+.mordalParent {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	background: #0009;
+	position: fixed;
+	left: 0;
+	top: 0;
+}
+
+#memoBox .space {
+	width: 30%;
+	height: 60%;
+	margin-top: 5%;
+	margin-left: 35%;
+	background: #000c;
+}
+
+#memoBox .txt {
+	width: 100%;
+	height: 100%;
+	color: white;
+	border: none;
+	margin-left: 2%;
+	background: #fff0;
+}
+
+button.save, button.discard {
+	height: 2.5rem;
+	border: none;
+	background: gray;
+	color: white;
+	float: right;
+}
+
+#memoBox .save, #memoBox .discard {
+	width: 12%;
+}
+
+.discard {
+	margin-right: 5px;
+}
+
+#memoBox .label, #tagBox .label {
+	height: 1.6rem;
+	width: 65%;
+	background: gray;
+	color: white;
+	padding-left: 3px;
+	padding-right: 3px;
+	padding-bottom: 1px;
+	float: left;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+#memoBox .label:before {
+	content: "memo: ";
+}
+
+/* mordal-window add tag */
+#tagBox .space {
+	width: 20%;
+	height: 6rem;
+	margin-top: 10%;
+	margin-left: 40%;
+	background: #0009;
+}
+
+#tagBox .label:before {
+	content: "add tag: ";
+}
+
+#tagBox .txt {
+	background: #f3f3f366;
+	color: white;
+	border: none;
+	margin-left: 2%;
+	margin-right: 2%;
+	margin-top: 2%;
+	width: 96%;
+	height: 30%;
 }
 

@@ -32,16 +32,25 @@ trait PnyaoService {
 class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
   private var db = (Files.readDB getOrElse Seq()).toBuffer
   private var updated = false
+  private var wrote = false
   def getDB() = db
-  def addDB(path: String, contents: Seq[Info]) = db = (path, contents) +: db
+  def addDB(path: String, contents: Seq[Info]): Unit = db = (path, contents) +: db
+  def deleteDBEntry(path: String): Unit = {
+    val newdb = db.filter {case (path_, _) => path != path_ }
+    if (newdb.length < db.length) {
+      updated = true
+      db = newdb
+    }
+  }
 
   // hook to write new data to DB
   private def work() = {
-     if (updated) {
+     if (updated && !wrote) {
         db foreach { case (path, contents) =>
           Files.writeToDB(path, contents)
         }
         Logger.info("write to DB")
+        wrote = true
       }
   }
 
@@ -67,7 +76,7 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
       case "memo"   => {
         info.memo.update(value); newval = Some(info.memo.toString)
       }
-      case "tag"    => { info.tag += value; newval = Some(info.tag.toString) }
+      case "tag"    => { if(value != "") {info.tag += value; newval = Some(info.tag.toString) }}
       case _        => ()
     }
 
