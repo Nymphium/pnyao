@@ -4,6 +4,8 @@ import
     scala.concurrent.Future
   , scala.collection.mutable.Buffer
 
+import java.io.File
+
 import javax.inject._
 
 import
@@ -25,7 +27,7 @@ import
 
 trait PnyaoService {
   def getDB(): Buffer[Files.DirnInfo]
-  def updateInfo(`type`: String, idx: Int, parent: String, value: String): Unit
+  def updateInfo(`type`: String, idx: Int, parent: String, value: String, rmTag: Option[Boolean]): Unit
 }
 
 @Singleton
@@ -34,19 +36,23 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
   private var updated = false
   private var wrote = false
   def getDB() = db
-  def addDB(path: String, contents: Seq[Info]): Unit = db = (path, contents) +: db
+  def addDB(path: String, contents: Seq[Info]): Unit = {
+    db = (path, contents) +: getDB()
+    updated = true
+  }
+
   def deleteDBEntry(path: String): Unit = {
-    val newdb = db.filter {case (path_, _) => path != path_ }
-    if (newdb.length < db.length) {
-      updated = true
-      db = newdb
-    }
+    db = db.filter {case (path_, _) => path != path_ }
+    updated = true
   }
 
   // hook to write new data to DB
   private def work() = {
      if (updated && !wrote) {
-        db foreach { case (path, contents) =>
+       new File(Files.getDBPath).delete
+
+        getDB() foreach { case (path, contents) =>
+          Logger.info(s"write ${path}")
           Files.writeToDB(path, contents)
         }
         Logger.info("write to DB")
@@ -55,7 +61,7 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
   }
 
   {
-    Logger.info("add stop hook ")
+    Logger.info("add stop hook")
 
     lifeCycle.addStopHook { () => work(); Future.successful(()) }
     sys.addShutdownHook( work )
@@ -64,10 +70,11 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
   def updateInfo(`type`: String,
                  idx: Int,
                  parent: String,
-                 value: String): Unit = {
+                 value: String,
+                 rmTag: Option[Boolean]): Unit = {
 
-    val dbIdx = db.zipWithIndex.filter { _._1._1 == parent }(0)._2
-    val entry = db(dbIdx)._2.toBuffer
+    val dbIdx = getDB().zipWithIndex.filter { _._1._1 == parent }(0)._2
+    val entry = getDB()(dbIdx)._2.toBuffer
     val info = entry(idx)
     var newval: Option[String] = None
     `type` match {
@@ -76,7 +83,23 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
       case "memo"   => {
         info.memo.update(value); newval = Some(info.memo.toString)
       }
-      case "tag"    => { if(value != "") {info.tag += value; newval = Some(info.tag.toString) }}
+      case "tag"    => {
+        if(value != "") {
+          rmTag match {
+            case Some(rmt) => {
+              if (rmt) {
+                info.tag -= value
+              } else {
+                info.tag += value
+              }
+
+              newval = Some(info.tag.toString)
+            }
+
+            case None => throw new Exception("tag removeflag is not set")
+          }
+        }
+      }
       case _        => ()
     }
 
@@ -84,7 +107,7 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
       updated = true
       Logger.info(s"update ${`type`} to `${newval}'")
       entry.update(idx, info)
-      db.update(dbIdx, (parent, entry.toSeq))
+      getDB().update(dbIdx, (parent, entry.toSeq))
     }
   }
 }

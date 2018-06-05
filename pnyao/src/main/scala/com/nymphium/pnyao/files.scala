@@ -103,7 +103,7 @@ object Files {
         .map(file => getInfoOpt(file.getAbsolutePath))
         .flatten
     } else {
-      throw new IOException(s"${dirName} is not a directory or not exist")
+      throw new IOException(s"${dirName} is not a directory or does not exist")
     }
   }
 
