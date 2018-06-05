@@ -15,49 +15,49 @@
 	margin-bottom:1rem;
 }
 
-.entry *,.entry-label * {
+.info *,.infoLabel * {
 	padding:3px 10px;
 	border:1px solid #999;
 }
 
-.entry input:hover {
+.info input:hover {
 	background:#ff0;
 }
 
-.entry textarea:hover {
+.info textarea:hover {
 	background:#ff0;
 }
 
-.entry,.entry-label {
+.info,.entryLabel {
 	display:table-row;
 	width:100%;
 }
 
-.entry-label * {
+.infoLabel * {
 	background:#b3db8d;
 }
 
-.entry:nth-child(even) {
+.info:nth-child(even) {
 	background:gray;
 	color:#fff;
 }
 
-.entry:nth-child(even) input {
+.info:nth-child(even) input {
 	background:gray;
 	color:#fff;
 }
 
-.entry:nth-child(even) input:hover {
+.info:nth-child(even) input:hover {
 	background:#ff0;
 	color:#000;
 }
 
-.entry:nth-child(even) textarea {
+.info:nth-child(even) textarea {
 	background:gray;
 	color:#fff;
 }
 
-.entry:nth-child(even) textarea:hover {
+.info:nth-child(even) textarea:hover {
 	background:#ff0;
 	color:#000;
 }
@@ -101,11 +101,11 @@ input, textarea {
 	white-space: nowrap;
 }
 
-.content .entry .title,
-.content .entry .author,
-.content .entry .tag,
-.content .entry .memo,
-.content .entry .path {
+.content .info .title,
+.content .info .author,
+.content .info .tag,
+.content .info .memo,
+.content .info .path {
 	overflow-x: scroll;
 }
 

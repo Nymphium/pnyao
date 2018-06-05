@@ -15,7 +15,7 @@ object RenderPnyao {
   def infoAsBody(idx: Int, info: Info): TypedTag[String] = {
     val path = Paths.get(info.path)
 
-    div(`class` := "entry", attr("path") := info.path)(
+    div(`class` := "info", attr("path") := info.path)(
       Seq(
         span(`class` := "index", idx),
         input(`class` := "title",
@@ -29,7 +29,7 @@ object RenderPnyao {
         span(`class` := "tag")(
           span(`class`:="tag0 add", "+")
           ,
-          info.tag().map {c => Logger.info(c); span(`class`:="tag0", c) }.toSeq
+          info.tag().map {c => span(`class`:="tag0 t", c) }.toSeq
           ),
         textarea(`class` := "memo",
               attr("idx") := idx,
@@ -57,7 +57,7 @@ object RenderPnyao {
                "delete from DB")
       ),
       div(`class` := "content")(
-        div(`class` := "entry-label")(
+        div(`class` := "infoLabel")(
           span(`class` := "index", "index"),
           input(`class` := "title",
                 `type` := "text",
