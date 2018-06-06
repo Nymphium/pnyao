@@ -1,31 +1,57 @@
 Pnyao
 ===
 
+![ui](doc/img/ui.png)
+
 Pnyao is a pdf management tool
 
-## usage[alpha versoin]
-### ready
+# usage[alpha versoin]
+## ready
 run server and go http://localhost:9000
 
 ```
 $ sbt run
 ```
 
-### set
+## set
 Put a directory name and click "add" button
 
 ![add entry](doc/img/entry.png)
 
-### go
+## go
 There are displayed contents. 
-You can change title/author metadata from the page and add memo, tag(, which is WIP).
+You can change title/author metadata from the page and add memo, tag.
 
 ![new contents](doc/img/newcontents.png)
 
-### WIP functions
-- tag
-- delete entry from DB
-- UI
+![tag](doc/img/tag.png)
+
+![memo](doc/img/memo.png)
+
+# DB
+DB is located at `~/.pnyaodb` by default, which is JSON file.
+
+```json
+[
+  {
+    "path": "/path/to/directory/of/documents",
+    "contents": [
+      {
+      "title": "PDF Title or empty string",
+      "author": "Author or empty string",
+      "path": "/absolute/path/to/pdf",
+      "tag": ["tag list"],
+      "memo": "memo or empty string"
+      }
+    ]
+  }
+]
+```
+
+DB file is updated when pnyao server shuts down, and simultaneously each `title`s and `author`s are wrote to the PDF's metadata.
+
+# Future work
+- Search and sort by Tags
 
 # license
 MIT
