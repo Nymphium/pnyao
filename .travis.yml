@@ -12,7 +12,7 @@ addons:
     packages:
       - oracle-java8-installer
 script:
-  - sbt compile
+  - sbt assembly compile
 before_cache:
   - find $HOME/.sbt -name "*.lock" | xargs rm
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
