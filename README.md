@@ -1,6 +1,8 @@
 Pnyao
 ===
 
+[![Build Status](https://travis-ci.org/Nymphium/pnyao.svg?branch=master)](https://travis-ci.org/Nymphium/pnyao)
+
 ![ui](doc/img/ui.png)
 
 Pnyao is a pdf management tool and can manipulate from the Web UI.
