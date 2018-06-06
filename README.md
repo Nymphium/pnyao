@@ -3,9 +3,9 @@ Pnyao
 
 ![ui](doc/img/ui.png)
 
-Pnyao is a pdf management tool
+Pnyao is a pdf management tool and can manipulate from the Web UI.
 
-# usage[alpha versoin]
+# usage
 ## ready
 run server and go http://localhost:9000
 
@@ -20,7 +20,7 @@ Put a directory name and click "add" button
 
 ## go
 There are displayed contents. 
-You can change title/author metadata from the page and add memo, tag.
+You can change title/author metadata of the PDF from the page, and add memo and tag.
 
 ![new contents](doc/img/newcontents.png)
 
