@@ -1,5 +1,42 @@
+body {
+	margin: 0 auto;
+	width: 113rem;
+}
+
+.pnyao-head {
+	border-bottom: solid cadetblue;
+}
+
+.pnyao-head .src {
+	text-decoration: none;
+	color: black;
+}
+
+#entryButton, button.delete {
+	height: 1.8rem;
+	background: gray;
+	color: white;
+	border: none;
+	margin-bottom: 5px;
+}
+
 .addEntry {
 	margin-bottom:1rem;
+}
+
+.addEntry * {
+	display: inline-block;
+}
+
+.addEntry h1 {
+	margin-right : 5px;
+}
+
+#addEntry {
+	background: gray;
+	color: white;
+	border: none;
+	height: 1.8rem;
 }
 
 .entryLabel {
@@ -35,6 +72,10 @@
 
 .infoLabel * {
 	background:#b3db8d;
+}
+
+.infoLabel, .info {
+	white-space:nowrap;
 }
 
 .info:nth-child(even) {
@@ -115,9 +156,14 @@ input, textarea {
 	height: 2.5rem;
 }
 
+.content .memo {
+	margin: 0;
+}
+
 .tag0 {
 	background: white;
 	color: black;
+	margin-right: 3px;
 }
 
 .tag0.add {
@@ -152,19 +198,13 @@ input, textarea {
 	background: #fff0;
 }
 
-button.save, button.discard {
-	height: 2.5rem;
+button.save, button.discard, button.add {
+	height: 1.6rem;
 	border: none;
 	background: gray;
 	color: white;
 	float: right;
-}
-
-#memoBox .save, #memoBox .discard {
-	width: 12%;
-}
-
-.discard {
+	font-weight: bolder;
 	margin-right: 5px;
 }
 

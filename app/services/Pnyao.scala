@@ -1,33 +1,27 @@
 package services
 
-import
-    scala.concurrent.Future
-  , scala.collection.mutable.Buffer
+import scala.concurrent.Future, scala.collection.mutable.Buffer
 
 import java.io.File
 
 import javax.inject._
 
-import
-    play.api.Logger
-  , play.api.inject.ApplicationLifecycle
+import play.api.Logger, play.api.inject.ApplicationLifecycle
 
-import
-    scalatags.Text.TypedTag
-  , scalatags.Text.all._
+import scalatags.Text.TypedTag, scalatags.Text.all._
 
-import
-    com.github.nymphium.pnyao.{Files, Info}
-  , com.github.nymphium.pnyao.Files.DirnInfo
+import com.github.nymphium.pnyao.{Files, Info},
+com.github.nymphium.pnyao.Files.DirnInfo
 
-import
-    io.circe._
-  , io.circe.syntax._
-  , io.circe.generic.auto._
+import io.circe._, io.circe.syntax._, io.circe.generic.auto._
 
 trait PnyaoService {
   def getDB(): Buffer[Files.DirnInfo]
-  def updateInfo(`type`: String, idx: Int, parent: String, value: String, rmTag: Option[Boolean]): Unit
+  def updateInfo(`type`: String,
+                 idx: Int,
+                 parent: String,
+                 value: String,
+                 rmTag: Option[Boolean]): Unit
 }
 
 @Singleton
@@ -42,30 +36,34 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
   }
 
   def deleteDBEntry(path: String): Unit = {
-    db = db.filter {case (path_, _) => path != path_ }
+    db = db.filter { case (path_, _) => path != path_ }
     updated = true
   }
 
-  // hook to write new data to DB
+  // hook to write new data to DB {{{
   private def work() = {
-     if (updated && !wrote) {
-       new File(Files.getDBPath).delete
+    if (updated && !wrote) {
+      new File(Files.getDBPath).delete
 
-        getDB() foreach { case (path, contents) =>
-          Logger.info(s"write ${path}")
+      getDB() foreach {
+        case (path, contents) =>
+          Logger.info(s"Pnyao/write ${path}")
           Files.writeToDB(path, contents)
-        }
-        Logger.info("write to DB")
-        wrote = true
       }
+      Logger.info("Pnyao/write to DB")
+      wrote = true
+    }
   }
 
   {
-    Logger.info("add stop hook")
+    Logger.info("Pnyao/add stop hook")
 
-    lifeCycle.addStopHook { () => work(); Future.successful(()) }
-    sys.addShutdownHook( work )
+    lifeCycle.addStopHook { () =>
+      work(); Future.successful(())
+    }
+    sys.addShutdownHook(work)
   }
+  // }}}
 
   def updateInfo(`type`: String,
                  idx: Int,
@@ -80,11 +78,11 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
     `type` match {
       case "title"  => { info.setTitle(value); newval = info.title }
       case "author" => { info.setAuthor(value); newval = info.author }
-      case "memo"   => {
+      case "memo" => {
         info.memo.update(value); newval = Some(info.memo.toString)
       }
-      case "tag"    => {
-        if(value != "") {
+      case "tag" =>
+        if (value != "")
           rmTag match {
             case Some(rmt) => {
               if (rmt) {
@@ -98,14 +96,13 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
 
             case None => throw new Exception("tag removeflag is not set")
           }
-        }
-      }
-      case _        => ()
+
+      case _ => ()
     }
 
     newval map { newval =>
       updated = true
-      Logger.info(s"update ${`type`} to `${newval}'")
+      Logger.info(s"Pnyao/update ${`type`} to `${newval}'")
       entry.update(idx, info)
       getDB().update(dbIdx, (parent, entry.toSeq))
     }

@@ -1,10 +1,7 @@
 package com.github.nymphium.pnyao
 
-import
-    io.circe._
-  , io.circe.syntax._
-  , io.circe.generic.auto._
-  , io.circe.generic.semiauto._
+import io.circe._, io.circe.syntax._, io.circe.generic.auto._,
+io.circe.generic.semiauto._
 
 // Tag: wrapper of Set[String]; to categorize an info {{{
 protected final class Tag() {
@@ -17,8 +14,8 @@ protected final class Tag() {
   override def toString(): String =
     tags.fold("") { _ + ", " + _ }.replaceFirst(", ", "")
 
-  def +=(tag: String*) = {tags ++= tag; updated = true}
-  def -=(tag: String) = {tags -= tag; updated = true}
+  def +=(tag: String*) = { tags ++= tag; updated = true }
+  def -=(tag: String) = { tags -= tag; updated = true }
   def <-?(tag: String) = tags(tag)
 }
 // }}}
@@ -33,7 +30,7 @@ protected final class Memo() {
 
   override def toString() = memo
 
-  def update(newmemo: String): Unit = {memo = newmemo; updated = true}
+  def update(newmemo: String): Unit = { memo = newmemo; updated = true }
 }
 // }}}
 
@@ -106,7 +103,11 @@ object Info {
     Decoder.forProduct5("title", "author", "path", "tag", "memo")({
       case (title, author, path, tag, memo) =>
         val info = new Info(StrUtils.build(title), StrUtils.build(author), path)
-        if(tag != "") {info.tag += tag}
+        if (tag != "") {
+          tag.split(",\\s*").toSeq foreach {
+            info.tag += _
+          }
+        }
         info.memo update memo
         info
     }: (String, String, String, String, String) => Info)
