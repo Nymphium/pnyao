@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				const t = e.target
 				t.blur()
 
-				memoLabel.textContent = getParentEntry(t).getAttribute("path")
+				memoLabel.textContent = getParentInfo(t).getAttribute("path")
 				memoBox.style.display = "block"
 				memoTextArea.value = getParentInfo(t).getElementsByClassName("memo")[0].value
 				memoTextArea.focus()
