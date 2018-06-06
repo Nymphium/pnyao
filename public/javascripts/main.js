@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							type: "tag",
 							idx: parseInt(info.getElementsByClassName("index")[0].textContent),
 							parent: getParentEntry(t).getAttribute("path"),
-							value: tagTxt.value,
+							value: t.textContent,
 							rmTag: true
 						}
 
