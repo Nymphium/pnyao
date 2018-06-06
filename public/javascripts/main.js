@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
-	const setTagHook = (tag) => {
+	const setTagHook = (tag) => { // {{{
 		// right click to remove tag
 		tag.addEventListener("contextmenu", (e) => e.preventDefault())
 		tag.addEventListener("mousedown", (e) => {
@@ -62,8 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		})
 	}
+	// }}}
 
-	const setHook = (elem) => {
+	const setHook = (elem) => { // {{{
 		elem = elem.parentNode
 
 		// title/author {{{
@@ -146,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		})
 		// }}}
 	}
+	// }}}
 
 	// observer to set hook to each elements added by addEntry {{{
 	const renderObserver = new MutationObserver((e) => {
@@ -223,36 +225,49 @@ document.addEventListener('DOMContentLoaded', () => {
 	// }}}
 
 	// tag box {{{
-	tagBox.getElementsByClassName("save")[0].addEventListener("click", (e) => {
-		const t = renderField.querySelectorAll('div[path="' + tagLabel.textContent + '"]')[0]
-		const tagSpan = t.getElementsByClassName("tag")[0]
+	;(() => {
+		const f = (e) => {
+			if(tagTxt.value === "") { return }
 
-		if (Array.from(tagSpan.getElementsByClassName("tag0")).find((e) => e.textContent === tagTxt.value) === undefined) {
-			const data = {
-				type: "tag",
-				idx: parseInt(t.getElementsByClassName("index")[0].textContent),
-				parent: getParentEntry(t).getAttribute("path"),
-				value: tagTxt.value,
-				rmTag: false
+			const t = renderField.querySelectorAll('div[path="' + tagLabel.textContent + '"]')[0]
+			const tagSpan = t.getElementsByClassName("tag")[0]
+
+			if (Array.from(tagSpan.getElementsByClassName("tag0")).find((e) => e.textContent === tagTxt.value) === undefined) {
+				const data = {
+					type: "tag",
+					idx: parseInt(t.getElementsByClassName("index")[0].textContent),
+					parent: getParentEntry(t).getAttribute("path"),
+					value: tagTxt.value,
+					rmTag: false
+				}
+
+				const xhr = new XMLHttpRequest()
+				xhr.open('POST', '/update', true)
+				xhr.setRequestHeader('Content-Type', 'application/json')
+				xhr.send(JSON.stringify(data))
+
+				const tag = document.createElement("span")
+				tag.className = "tag0 t"
+
+				tag.textContent = tagTxt.value
+				tagSpan.append(tag)
+				setTagHook(tag)
+			} else {
+				alert("tag `" + tagTxt.value + "' already exists")
 			}
-
-			const xhr = new XMLHttpRequest()
-			xhr.open('POST', '/update', true)
-			xhr.setRequestHeader('Content-Type', 'application/json')
-			xhr.send(JSON.stringify(data))
-
-			const tag = document.createElement("span")
-			tag.className = "tag0 t"
-
-			tag.textContent = tagTxt.value
-			tagSpan.append(tag)
-			setTagHook(tag)
-		} else {
-			alert("tag `" + tagTxt.value + "' already exists")
 		}
 
-		tagBox.style.display = "none"
-	})
+		tagBox.getElementsByClassName("save")[0].addEventListener("click", (e) => {
+			f(e)
+			tagBox.style.display = "none"
+		})
+
+		tagBox.getElementsByClassName("add")[0].addEventListener("click", (e) => {
+			f(e)
+			tagTxt.value = ""
+			tagTxt.focus()
+		})
+	})()
 
 	tagBox.getElementsByClassName("discard")[0].addEventListener("click", (e) => {
 		tagBox.style.display = "none"
