@@ -16,7 +16,7 @@ runscript="pnyao.sh"
 pid_path="/tmp/pnyao.pid"
 
 cat <<-SHELL > "${runscript}"
-#!/usr/bin/bash
+#!/bin/bash
 
 java -Dpidfile.path=${pid_path} -Dplay.http.secret.key=none -jar ~/.config/systemd/pnyao/${target_jar}
 SHELL
@@ -34,7 +34,7 @@ Description=Pnyao PDF Management system Server
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/bash ${HOME}/.config/systemd/script/${runscript}
+ExecStart=/bin/bash ${HOME}/.config/systemd/script/${runscript}
 
 [Install]
 WantedBy=multi-user.target
