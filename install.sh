@@ -31,13 +31,14 @@ service="pnyao-server.service"
 cat <<-INI > "${service}"
 [Unit]
 Description=Pnyao PDF Management system Server
+After=network.target
 
 [Service]
 Type=simple
 ExecStart=/bin/bash ${HOME}/.config/systemd/script/${runscript}
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 INI
 
 mv "${service}" ~/.config/systemd/user/
