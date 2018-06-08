@@ -5,22 +5,32 @@ Pnyao
 
 ![ui](doc/img/ui.png)
 
-Pnyao is a pdf management tool and can manipulate from the Web UI.
+Pnyao is a pdf management system and can manipulate from the Web UI.
 
 # usage
-## ready
-run server and go http://localhost:9000
+## Ready
+Run server
 
-```
+```shell-session
 $ sbt run
 ```
 
-## set
+or install pnyao on your PC and run with systemd
+
+```shell-session
+$ ./install.sh
+$ systemctl --user enable pnyao-server.service && \
+  systemctl --user start pnyao-server.service
+```
+
+and go http://localhost:9000
+
+## Set
 Put a directory name and click "add" button
 
 ![add entry](doc/img/entry.png)
 
-## go
+## GO
 There are displayed contents. 
 You can change title/author metadata of the PDF from the page, and add memo and tag.
 
