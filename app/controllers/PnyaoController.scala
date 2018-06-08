@@ -11,10 +11,12 @@ import services.RenderPnyao
 
 import play.api.Logger,
 play.api.libs.Files.{TemporaryFile, SingletonTemporaryFileCreator},
-play.api.mvc._, play.api.libs.json._, play.api.libs.functional.syntax._,
+play.api.mvc.{AbstractController, ControllerComponents, Action},
+play.api.libs.json.{JsPath, Json},
+play.api.libs.functional.syntax._,
 play.api.inject.ApplicationLifecycle
 
-import javax.inject._
+import javax.inject.{Singleton, Inject}
 
 protected case class UpTup(`type`: String,
                            idx: Int,
@@ -40,25 +42,23 @@ class PnyaoController @Inject()(
 
   // hook to delete tempfiles {{{
   private var tempList: Seq[TemporaryFile] = Seq()
-  private var tempListDeleted = false
-  private var hooked = false
-  private def deleteTempList() = {
-    if (!tempListDeleted) {
-      tempList foreach { _.delete }; tempListDeleted = true
-    }
+  private lazy val deleteTempList = {
+    Logger.info("PnyaoController/delete tempfiles")
+    tempList foreach { _.delete }
   }
 
-  private def setHook() = {
-    hooked = true
+  private lazy val setHook: Unit = {
     Logger.info("PnyaoController/add stop hook")
     lifeCycle.addStopHook { () =>
       {
-        deleteTempList()
+        val () = deleteTempList
         Future.successful(())
       }
     }
 
-    sys addShutdownHook deleteTempList
+    sys addShutdownHook { () =>
+      deleteTempList
+    }
   }
   // }}}
 
@@ -84,7 +84,7 @@ class PnyaoController @Inject()(
   }
 
   def openPDF(href: String) = Action {
-    if (!hooked) setHook
+    val () = setHook
 
     val it = URLDecoder.decode(href, "UTF-8")
     val fileToServe = SingletonTemporaryFileCreator.create("pnyaotmp", ".pdf")
