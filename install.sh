@@ -44,21 +44,23 @@ mv "${service}" ~/.config/systemd/user/
 ## }}}
 
 ## generate test {{{
-
 set +u
 
 if [[ "${1}" = "with-test" ]]; then
 	test="test.sh"
 
 	cat <<-SH > "${test}"
-#!/bin/bash -eux
+#!/bin/bash -ux
+
+
 ${HOME}/.config/systemd/script/${runscript} &
 PID=\$!
-sleep 5
+
+sleep 10
+trap 'kill \$PID && kill \$(cat ${pid_path})' 0 1 3 15
+
 curl http://localhost:9000 >/dev/null
 ok=\$?
-kill \$PID
-kill \$(cat ${pid_path})
 exit "\${ok}"
 	SH
 
