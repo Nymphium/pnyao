@@ -13,11 +13,12 @@ cp "target/scala-${scala_version}/${target_jar}" ~/.config/systemd/pnyao/
 
 ## generate run script {{{
 runscript="pnyao.sh"
+pid_path="/tmp/pnyao.pid"
 
 cat <<-SHELL > "${runscript}"
 #!/usr/bin/bash
 
-java -Dplay.http.secret.key=none -jar ~/.config/systemd/pnyao/${target_jar}
+java -Dpidfile.path=${pid_path} -Dplay.http.secret.key=none -jar ~/.config/systemd/pnyao/${target_jar}
 SHELL
 
 chmod 755 "${runscript}"
@@ -40,5 +41,28 @@ WantedBy=multi-user.target
 INI
 
 mv "${service}" ~/.config/systemd/user/
+## }}}
+
+## generate test {{{
+
+set +u
+
+if [[ "${1}" = "with-test" ]]; then
+	test="test.sh"
+
+	cat <<-SH > "${test}"
+#!/bin/bash -eux
+${HOME}/.config/systemd/script/${runscript} &
+PID=\$!
+sleep 5
+curl http://localhost:9000 >/dev/null
+ok=\$?
+kill \$PID
+kill \$(cat ${pid_path})
+exit "\${ok}"
+	SH
+
+	chmod 755 "${test}"
+fi
 ## }}}
 
