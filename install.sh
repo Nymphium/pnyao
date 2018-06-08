@@ -1,4 +1,4 @@
-#!/usr/bin/bash -eu
+#!/bin/bash -eu
 
 product_version=$(awk '$1 == "version" {gsub(/"/, "", $3); print $3}' build.sbt)
 scala_version=$(awk '$1 == "scalaVersion" {gsub(/"/, "", $3); gsub(/\.[0-9]+$/, "", $3); print $3}' build.sbt)

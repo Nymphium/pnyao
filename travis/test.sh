@@ -1,4 +1,4 @@
-#!/usr/bin/bash -eux
+#!/bin/bash -eux
 
 ./install.sh
 
