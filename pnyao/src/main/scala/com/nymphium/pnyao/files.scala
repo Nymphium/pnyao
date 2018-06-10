@@ -8,21 +8,21 @@ import java.io.{
   ByteArrayOutputStream
 }
 
-import java.nio.file.{Files => NIOFiles, StandardCopyOption, StandardOpenOption, Paths}
+import java.nio.file.{
+  Files => NIOFiles,
+  StandardCopyOption,
+  StandardOpenOption,
+  Paths
+}
 
 import org.apache.commons.io.FilenameUtils
 
-import
-    scala.collection.JavaConversions._
-  , scala.io.Source
+import scala.collection.JavaConversions._, scala.io.Source
 
 import com.itextpdf.text.pdf.{PdfReader, PdfWriter, PdfStamper}
 import com.itextpdf.text.xml.xmp.XmpWriter
 
-import
-    io.circe._
-   , io.circe.syntax._
-   , io.circe.generic.auto._
+import io.circe._, io.circe.syntax._, io.circe.generic.auto._
 
 object Files {
   // pnyao database with manipulation {{{
@@ -107,6 +107,31 @@ object Files {
     }
   }
 
+  // get untracked files' information and remove vanished files
+  def traverseDirectory(dirName: String, current: Seq[Info]): Seq[Info] = {
+    val dir = new File(dirName)
+    var current_ = current.toSet
+
+    if (dir.exists && dir.isDirectory) {
+      dir.listFiles
+        .filter(_.isFile)
+        .toSeq
+        .map(file => {
+          val path = file.getAbsolutePath
+          val einfo = current_.find { case Info(_, _, ipath) => path == ipath }
+          if (einfo.isEmpty) getInfoOpt(path)
+          else {
+            current_ = current_ - einfo.get
+            if (file.exists) einfo
+            else None
+          }
+        })
+        .flatten
+    } else {
+      throw new IOException(s"${dirName} is not a directory or does not exist")
+    }
+  }
+
   // database manipulation
   def writeToDB(targetPath: String, newcontent: Seq[Info]) = {
     val file = new File(getDBPath)
@@ -133,7 +158,7 @@ object Files {
         close
       }
 
-      newcontent foreach {info => 
+      newcontent foreach { info =>
         if (info.isUpdated) setInfo(info)
       }
     }
@@ -142,15 +167,11 @@ object Files {
   def readDB(): Either[io.circe.Error, Seq[DirnInfo]] = {
     val file = new File(getDBPath)
 
-    parser.decode[Seq[DirnInfo]] {
-      if (file.exists) {
-        Source.fromFile(getDBPath).getLines.mkString
-      } else {
-        ""
-      }
+    if (file.exists) {
+      parser.decode[Seq[DirnInfo]](Source.fromFile(getDBPath).getLines.mkString)
+    } else {
+      Left(io.circe.DecodingFailure(s"$getDBPath not found", List()))
     }
-
-    // TODO: check consistency between files and DB
   }
 
   // for conversion from/to JSON {{{

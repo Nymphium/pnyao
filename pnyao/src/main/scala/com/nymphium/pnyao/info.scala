@@ -58,9 +58,6 @@ class Info(var title: Option[String],
       memo: ${memo}"""
       .replaceAll("""\n\s*""", "\n")
 
-  def unapply(): (Option[String], Option[String], String) =
-    (title, author, path)
-
   def setTitle(newtitle: String): Unit = {
     title = StrUtils.build(newtitle)
     updated = true
@@ -75,6 +72,9 @@ class Info(var title: Option[String],
 object Info {
   def apply(title: String, author: String, path: String) =
     new Info(StrUtils.build(title), StrUtils.build(author), path)
+
+  def unapply(info: Info): Option[(Option[String], Option[String], String)] =
+    Option(info.title, info.author, info.path)
 
   // for conversion from/to JSON   {{{
   implicit val encodeString: Encoder[String] = {
