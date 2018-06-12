@@ -1,5 +1,6 @@
 GET    /                           controllers.PnyaoController.index
 GET    /favicon.ico                controllers.Assets.at(path="/public", file="favicon.ico")
+GET    /plain                      controllers.PnyaoController.plain
 POST   /update                     controllers.PnyaoController.updateInfo
 GET    /open/:href                 controllers.PnyaoController.openPDF(href: String)
 GET    /add/:path                  controllers.PnyaoController.addEntry(path: String)
