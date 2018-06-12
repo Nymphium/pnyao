@@ -41,6 +41,21 @@ class PnyaoController @Inject()(
     Ok(views.html.index(RenderPnyao.render(pnyao.syncDBEntries).toString))
   }
 
+  def plain = Action {
+    Ok(
+      pnyao.getDB
+        .fold("") {
+          case (z, (path, (contents: Seq[_]))) => {
+            "%s\n%s:\n%s".format(z, path, contents.fold("") {
+              case (z, x) => "%s\n%s\n-----\n".format(z, x)
+            })
+          }
+        }
+        .toString
+        .replaceFirst("\n", "")
+        .replace("\n$", ""))
+  }
+
   def updateInfo = Action.async(parse.json) { request =>
     request.body
       .validate[UpTup]

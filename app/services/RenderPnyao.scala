@@ -15,7 +15,7 @@ object RenderPnyao {
   def infoAsBody(idx: Int, info: Info): TypedTag[String] = {
     val path = Paths.get(info.path)
 
-    div(`class` := "info", attr("path") := info.path)(
+    div(`class` := "info", attr("path") := info.path, style:= "display: block;")(
       Seq(
         span(`class` := "index", idx),
         input(`class` := "title",

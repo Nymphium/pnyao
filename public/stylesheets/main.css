@@ -12,7 +12,7 @@ body {
 	color: black;
 }
 
-#entryButton, button.delete {
+#entryButton, #searchButton, button.delete {
 	height: 1.8rem;
 	background: gray;
 	color: white;
@@ -20,19 +20,23 @@ body {
 	margin-bottom: 5px;
 }
 
-.addEntry {
-	margin-bottom:1rem;
-}
-
-.addEntry * {
+.controls * {
 	display: inline-block;
 }
 
-.addEntry h1 {
+#search {
+	float: right;
+}
+
+#addEntry, #search {
+	margin-bottom:1rem;
+}
+
+#addEntry h1 {
 	margin-right : 5px;
 }
 
-#addEntry {
+#addEntryBox, #searchBox {
 	background: gray;
 	color: white;
 	border: none;
@@ -57,13 +61,13 @@ body {
 	border:1px solid #999;
 }
 
-.info input:hover {
-	background:#ff0;
-}
+/* .info input:hover { */
+	/* background:#ff0; */
+/* } */
 
-.info textarea:hover {
-	background:#ff0;
-}
+/* .info textarea:hover { */
+	/* background:#ff0; */
+/* } */
 
 .info,.entryLabel {
 	display:table-row;
@@ -88,19 +92,9 @@ body {
 	color:#fff;
 }
 
-.info:nth-child(even) input:hover {
-	background:#ff0;
-	color:#000;
-}
-
 .info:nth-child(even) textarea {
 	background:gray;
 	color:#fff;
-}
-
-.info:nth-child(even) textarea:hover {
-	background:#ff0;
-	color:#000;
 }
 
 html {

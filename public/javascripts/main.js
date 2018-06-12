@@ -1,7 +1,7 @@
 "use esversion: 6";
 
 document.addEventListener('DOMContentLoaded', () => {
-	const entryInput = document.getElementById("addEntry")
+	const entryInput = document.getElementById("addEntryBox")
 	const renderField = document.getElementById("renderField")
 
 	const memoBox = document.getElementById("memoBox")
@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	const tagBox = document.getElementById("tagBox");
 	const tagTxt = tagBox.getElementsByTagName("input")[0];
 	const tagLabel = tagBox.getElementsByClassName("label")[0];
+
+	const searchBox = document.getElementById("searchBox")
+
+	entryInput.value = ""
+	memoTextArea.value = ""
+	tagTxt.value = ""
+	searchBox.value = ""
 
 	const getParentEntry = (e) => {
 		if (e.className === "direntry") {
@@ -194,9 +201,33 @@ document.addEventListener('DOMContentLoaded', () => {
 	})
 	// }}}
 
+	// search {{{
+	;(() => {
+		let searching = false
+		const redisplay = () => Array.from(renderField.querySelectorAll(".info:not(.infoLabel) .tag")).map((e) => getParentInfo(e).style.display = "block")
+
+		document.getElementById("searchButton").addEventListener("click", () => {
+			const val = searchBox.value
+
+			if (val !== "") {
+				if (searching) redisplay()
+
+				searching = true
+				Array.from(renderField.querySelectorAll(".info:not(.infoLabel) .tag")).filter((e) =>
+					! (Array.from(e.querySelectorAll(".add:only-child")).length === 0 &&
+						Array.from(e.querySelectorAll(".t")).some((c) => c.textContent.match(val))))
+						.forEach((e) => getParentInfo(e).style.display = "none")
+			} else {
+				redisplay()
+				searching = false
+			}
+		})
+	})()
+	// }}}
+
 	// memo box {{{
 	memoBox.getElementsByClassName("save")[0].addEventListener("click", (e) => {
-		const t = renderField.querySelectorAll('div[path="' + memoLabel.textContent + '"]')[0]
+		const t = renderField.querySelectorAll('.info:not(.infoLabel) div[path="' + memoLabel.textContent + '"]')[0]
 		const value = memoTextArea.value
 		const targetMemo = t.getElementsByClassName("memo")[0]
 
@@ -229,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const f = (e) => {
 			if(tagTxt.value === "") { return }
 
-			const t = renderField.querySelectorAll('div[path="' + tagLabel.textContent + '"]')[0]
+			const t = renderField.querySelectorAll('.info:not(.infoLabel) div[path="' + tagLabel.textContent + '"]')[0]
 			const tagSpan = t.getElementsByClassName("tag")[0]
 
 			if (Array.from(tagSpan.getElementsByClassName("tag0")).find((e) => e.textContent === tagTxt.value) === undefined) {
