@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// memo box {{{
 	memoBox.getElementsByClassName("save")[0].addEventListener("click", (e) => {
-		const t = renderField.querySelectorAll('.info:not(.infoLabel) div[path="' + memoLabel.textContent + '"]')[0]
+		const t = renderField.querySelectorAll('.info:not(.infoLabel)[path="' + memoLabel.textContent + '"]')[0]
 		const value = memoTextArea.value
 		const targetMemo = t.getElementsByClassName("memo")[0]
 
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const f = (e) => {
 			if(tagTxt.value === "") { return }
 
-			const t = renderField.querySelectorAll('.info:not(.infoLabel) div[path="' + tagLabel.textContent + '"]')[0]
+			const t = renderField.querySelectorAll('.info:not(.infoLabel)[path="' + tagLabel.textContent + '"]')[0]
 			const tagSpan = t.getElementsByClassName("tag")[0]
 
 			if (Array.from(tagSpan.getElementsByClassName("tag0")).find((e) => e.textContent === tagTxt.value) === undefined) {
