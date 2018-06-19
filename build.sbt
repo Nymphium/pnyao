@@ -1,5 +1,5 @@
 name := "pnyao"
-version := "1.0-SNAPSHOT"
+version := "1.0"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 scalaVersion := "2.12.5"
