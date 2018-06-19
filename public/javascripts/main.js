@@ -8,11 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	const memoTextArea = memoBox.getElementsByTagName("textarea")[0]
 	const memoLabel = memoBox.getElementsByClassName("label")[0]
 
-	const tagBox = document.getElementById("tagBox");
-	const tagTxt = tagBox.getElementsByTagName("input")[0];
-	const tagLabel = tagBox.getElementsByClassName("label")[0];
+	const tagBox = document.getElementById("tagBox")
+	const tagTxt = tagBox.getElementsByTagName("input")[0]
+	const tagLabel = tagBox.getElementsByClassName("label")[0]
 
 	const searchBox = document.getElementById("searchBox")
+
+	const saveButton = document.getElementById("saveButton")
 
 	entryInput.value = ""
 	memoTextArea.value = ""
@@ -223,6 +225,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		})
 	})()
+	// }}}
+
+	// save {{{
+	saveButton.addEventListener('click', () => {
+		const xhr = new XMLHttpRequest()
+		xhr.open('GET', '/save', true)
+		xhr.send()
+	})
 	// }}}
 
 	// memo box {{{

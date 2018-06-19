@@ -65,7 +65,7 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
       db = getDB().filter { _._1 != path }
       updated = true
       true
-    } else  false 
+    } else false
   }
 
   def syncDBEntries(): Seq[DirnInfo] = {
@@ -128,8 +128,9 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
     fileToServe.path.toFile
   }
 
-  // hook to write new data to DB {{{
-  private lazy val work = {
+  def saveToDB() = save()
+
+  private def save() = {
     if (updated) {
       new File(Files.getDBPath).delete
 
@@ -138,8 +139,16 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
           Logger.info(s"Pnyao/write DB of ${path}")
           Files.writeToDB(path, contents)
       }
+
       Logger.info("Pnyao/write to DB")
     }
+
+    updated = false
+  }
+
+  // hook to write new data to DB {{{
+  private lazy val work = {
+    save()
 
     tempList foreach { _.delete }
     Logger.info("Pnyao/delete tempfiles")

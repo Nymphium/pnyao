@@ -98,4 +98,10 @@ class PnyaoController @Inject()(
       }
     }
   }
+
+  def save = Action {
+    pnyao.saveToDB
+
+    Ok("saved to DB")
+  }
 }
