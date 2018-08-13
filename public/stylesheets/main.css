@@ -12,7 +12,7 @@ body {
 	color: black;
 }
 
-#entryButton, #searchButton, #saveButton, button.delete {
+#entryButton, #saveButton, button.delete {
 	height: 1.9rem;
 	background: gray;
 	color: white;
