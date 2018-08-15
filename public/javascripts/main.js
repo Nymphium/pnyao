@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 	const entryInput = document.getElementById("addEntryBox")
 	const renderField = document.getElementById("renderField")
+	let tags = renderField.querySelectorAll(".info:not(.infoLabel) .tag")
 
 	const memoBox = document.getElementById("memoBox")
 	const memoTextArea = memoBox.getElementsByTagName("textarea")[0]
@@ -20,6 +21,22 @@ document.addEventListener('DOMContentLoaded', () => {
 	memoTextArea.value = ""
 	tagTxt.value = ""
 	searchBox.value = ""
+
+	const search = (() => {
+		return () => {
+			Array.from(tags)
+				.map((e) => getParentInfo(e).style.display = "block")
+
+			const val = searchBox.value
+
+			if (val !== "") {
+				Array.from(tags).filter((e) =>
+						! (Array.from(e.querySelectorAll(".add:only-child")).length === 0 &&
+							Array.from(e.querySelectorAll(".t")).some((c) => c.textContent.match(val))))
+					.forEach((e) => getParentInfo(e).style.display = "none")
+			}
+		}
+	})()
 
 	const getParentEntry = (e) => {
 		if (e.className === "direntry") {
@@ -68,8 +85,15 @@ document.addEventListener('DOMContentLoaded', () => {
 					 case 0: // left click
 						search infos by tag and show them
 						*/
+
+				 case 0: // left click
+					searchBox.value = t.textContent
+					search()
+					break;
 			}
 		})
+
+		tags = renderField.querySelectorAll(".info:not(.infoLabel) .tag")
 	}
 	// }}}
 
@@ -204,27 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	// }}}
 
 	// search {{{
-	;(() => {
-		let searching = false
-		const redisplay = () => Array.from(renderField.querySelectorAll(".info:not(.infoLabel) .tag")).map((e) => getParentInfo(e).style.display = "block")
-
-		document.getElementById("searchButton").addEventListener("click", () => {
-			const val = searchBox.value
-
-			if (val !== "") {
-				if (searching) redisplay()
-
-				searching = true
-				Array.from(renderField.querySelectorAll(".info:not(.infoLabel) .tag")).filter((e) =>
-					! (Array.from(e.querySelectorAll(".add:only-child")).length === 0 &&
-						Array.from(e.querySelectorAll(".t")).some((c) => c.textContent.match(val))))
-						.forEach((e) => getParentInfo(e).style.display = "none")
-			} else {
-				redisplay()
-				searching = false
-			}
-		})
-	})()
+	searchBox.addEventListener("keyup", search)
 	// }}}
 
 	// save {{{
