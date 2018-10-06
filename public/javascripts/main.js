@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	const tagTxt = tagBox.getElementsByTagName("input")[0]
 	const tagLabel = tagBox.getElementsByClassName("label")[0]
 
+	const renameBox = document.getElementById("renameBox")
+	const renameTxt = renameBox.getElementsByTagName("input")[0]
+	const renameLabel = renameBox.getElementsByClassName("label")[0]
+
 	const searchBox = document.getElementById("searchBox")
 
 	const saveButton = document.getElementById("saveButton")
@@ -21,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	memoTextArea.value = ""
 	tagTxt.value = ""
 	searchBox.value = ""
+
+	Array.from(document.querySelectorAll(".mordalParent")).forEach((e) =>
+		e.addEventListener("contextmenu", (e) => e.preventDefault()))
 
 	const search = (() => {
 		return () => {
@@ -317,6 +324,59 @@ document.addEventListener('DOMContentLoaded', () => {
 	tagBox.getElementsByClassName("discard")[0].addEventListener("click", (e) => {
 		tagBox.style.display = "none"
 	})
+	// }}}
+
+	// rename {{{
+	renameBox.getElementsByClassName("discard")[0].addEventListener("click", (e) => {
+		renameBox.style.display = "none"
+	})
+
+
+	;(() => {
+		let origFileName
+		let clickedFrom
+
+		Array.from(renderField.querySelectorAll(".info:not(.infoLabel) .path")).forEach((e) => {
+			e.addEventListener("contextmenu", (e) => e.preventDefault())
+
+			e.addEventListener("mousedown", (e) => {
+				const t = e.target
+				clickedFrom = t
+
+				if (e.button === 2) {
+					renameBox.style.display = "block"
+					renameLabel.textContent = t.text
+					renameTxt.value = t.text
+					origFileName = t.text
+					renameTxt.focus()
+				}
+			})
+		})
+
+		renameBox.getElementsByClassName("rename")[0].addEventListener("click", (e) => {
+			const newname = renameTxt.value
+
+			if (newname === origFileName) return;
+
+			const encodedOrig = encodeURIComponent(origFileName)
+			const encodedNew = encodeURIComponent(newname)
+			const info = getParentInfo(clickedFrom)
+			const infopath = info.getAttribute("path")
+
+			const param = `src=${encodeURIComponent(infopath)}&dst=${encodedNew}`
+
+			const xhr = new XMLHttpRequest()
+			xhr.open('GET', `/rename?${param}`, true)
+			xhr.onload = () => {
+				clickedFrom.href = clickedFrom.href.replace(encodedOrig, encodedNew)
+				clickedFrom.textContent = newname
+				info.setAttribute("path", infopath.replace(origFileName, newname))
+
+				renameBox.style.display = "none"
+			}
+			xhr.send()
+		})
+	})()
 	// }}}
 })
 

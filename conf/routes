@@ -3,6 +3,7 @@ GET    /favicon.ico                controllers.Assets.at(path="/public", file="f
 GET    /plain                      controllers.PnyaoController.plain
 GET    /save                       controllers.PnyaoController.save
 POST   /update                     controllers.PnyaoController.updateInfo
+GET    /rename           controllers.PnyaoController.renameFile(src: String, dst: String)
 GET    /open/:href                 controllers.PnyaoController.openPDF(href: String)
 GET    /add/:path                  controllers.PnyaoController.addEntry(path: String)
 GET    /delete/:path               controllers.PnyaoController.deleteEntry(path: String)

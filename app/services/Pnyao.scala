@@ -60,7 +60,7 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
     }
   }
 
-  def deleteDBEntry(path: String) = {
+  def isSuccessDeleteEntry(path: String) = {
     if (db.exists { _._1 == path }) {
       db = getDB().filter { _._1 != path }
       updated = true
@@ -116,6 +116,30 @@ class Pnyao @Inject()(lifeCycle: ApplicationLifecycle) extends PnyaoService {
       entry.update(idx, info)
       getDB().update(dbIdx, (parent, entry.toSeq))
     }
+  }
+
+  def renameFile(srcInfo: Info, dst: String) = {
+    val sfile = new File(srcInfo.path)
+    val parent = sfile.getParent
+    val absDstPath = Paths get {
+      if ((dst charAt 0) == '/') dst
+      else s"${parent}/${dst}"
+    }
+
+    NIOFiles.copy(sfile.toPath, absDstPath, StandardCopyOption.REPLACE_EXISTING)
+    NIOFiles.delete(sfile.toPath)
+
+    val dbIdx = syncDBEntries.zipWithIndex.filter { _._1._1 == parent }(0)._2
+    val entry = getDB()(dbIdx)._2.toBuffer
+    val idx = entry.zipWithIndex.filter { _._1.path == absDstPath.toString }(0)._2
+    val info = entry(idx)
+
+    srcInfo.tag().toSeq.foreach { info.tag += _ }
+    info.memo.update(srcInfo.memo.toString)
+
+    updated = true
+    entry.update(idx, info)
+    getDB().update(dbIdx, (parent, entry.toSeq))
   }
 
   def openPDF(it: String) = {
