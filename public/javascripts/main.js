@@ -29,17 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
 	Array.from(document.querySelectorAll(".mordalParent")).forEach((e) =>
 		e.addEventListener("contextmenu", (e) => e.preventDefault()))
 
+	const normalize = (str) => str.toLowerCase().replace(/(\s|-)+/g, '-')
+
 	const search = (() => {
 		return () => {
 			Array.from(tags)
 				.map((e) => getParentInfo(e).style.display = "block")
 
-			const val = searchBox.value
+			const val = normalize(searchBox.value)
 
 			if (val !== "") {
 				Array.from(tags).filter((e) =>
 						! (Array.from(e.querySelectorAll(".add:only-child")).length === 0 &&
-							Array.from(e.querySelectorAll(".t")).some((c) => c.textContent.match(val))))
+							Array.from(e.querySelectorAll(".t")).some((c) => normalize(c.textContent).match(val))))
 					.forEach((e) => getParentInfo(e).style.display = "none")
 			}
 		}
@@ -80,12 +82,14 @@ document.addEventListener('DOMContentLoaded', () => {
 							rmTag: true
 						}
 
-						const xhr = new XMLHttpRequest()
-						xhr.open('POST', '/update', true)
-						xhr.setRequestHeader('Content-Type', 'application/json')
-						xhr.send(JSON.stringify(data))
+						fetch('/update', {
+							method: 'POST',
+							body: JSON.stringify(data),
+							headers: {
+								'Content-Type': 'application/json'
+							}})
 
-						 info.getElementsByClassName("tag")[0].removeChild(tag)
+						info.getElementsByClassName("tag")[0].removeChild(tag)
 					}
 					break;
 					/* TODO:
@@ -118,10 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
 					value: t.value
 				}
 
-				const xhr = new XMLHttpRequest()
-				xhr.open('POST', '/update', true)
-				xhr.setRequestHeader('Content-Type', 'application/json')
-				xhr.send(JSON.stringify(data))
+				fetch('/update', {
+					method: 'POST',
+					body: JSON.stringify(data),
+					headers: {
+						'Content-Type': 'application/json'
+					}})
 			})})
 		// }}}
 
@@ -165,15 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				const val = encodeURIComponent(path)
 
 				if (confirm("delete DB `" + path + "'?")) {
-					const xhr = new XMLHttpRequest()
-
-					xhr.open('GET', '/delete/' + val, true)
-
-					xhr.onload = () => {
-						getParentEntry(t).outerHTML = ""
-					}
-
-					xhr.send()
+					fetch(`/delete/${val}`, { method: 'GET', })
+					.then(() => { getParentEntry(t).outerHTML = "" })
 				}
 			})})
 		// }}}
@@ -207,19 +206,17 @@ document.addEventListener('DOMContentLoaded', () => {
 	document.getElementById("entryButton").addEventListener("click", () => {
 		const val = encodeURIComponent(entryInput.value)
 		if (val.length > 0) {
-			const xhr = new XMLHttpRequest()
+			fetch(`/add/${val}`, { method : 'GET' })
+			.then(response => {
+				if (response.text()[0] === "2") {
+					const rjson = response.json()
 
-			xhr.open('GET', '/add/' + val, true)
-			xhr.onload = () => {
-				if (xhr.status.toString()[0] === "2") {
-					const response = JSON.parse(xhr.response)
-
-					switch (response.status) {
+					switch (rjson.status) {
 						case "alreadyloaded":
-							alert(response.message)
+							alert(rjson.message)
 							break;
 						case "OK":
-							renderField.innerHTML = response.message + renderField.innerHTML
+							renderField.innerHTML = rjson.message + renderField.innerHTML
 							break;
 					}
 
@@ -227,9 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				} else {
 					alert("directory not found: " + entryInput.value)
 				}
-			}
-
-			xhr.send()
+			})
 		}
 	})
 	// }}}
@@ -240,9 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	// save {{{
 	saveButton.addEventListener('click', () => {
-		const xhr = new XMLHttpRequest()
-		xhr.open('GET', '/save', true)
-		xhr.send()
+		fetch('/save', { method: 'GET' })
 	})
 	// }}}
 
@@ -264,10 +257,12 @@ document.addEventListener('DOMContentLoaded', () => {
 				value: value
 			}
 
-			const xhr = new XMLHttpRequest()
-			xhr.open('POST', '/update', true)
-			xhr.setRequestHeader('Content-Type', 'application/json')
-			xhr.send(JSON.stringify(data))
+			fetch('/update', {
+				method: 'POST',
+				body: JSON.stringify(data),
+				headers: {
+					'Content-Type': 'application/json'
+				}})
 		}
 	})
 
@@ -293,10 +288,12 @@ document.addEventListener('DOMContentLoaded', () => {
 					rmTag: false
 				}
 
-				const xhr = new XMLHttpRequest()
-				xhr.open('POST', '/update', true)
-				xhr.setRequestHeader('Content-Type', 'application/json')
-				xhr.send(JSON.stringify(data))
+				fetch('/update', {
+					method: 'POST',
+					body: JSON.stringify(data),
+					headers: {
+						'Content-Type': 'application/json'
+					}})
 
 				const tag = document.createElement("span")
 				tag.className = "tag0 t"
