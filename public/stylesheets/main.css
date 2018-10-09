@@ -202,7 +202,7 @@ input, textarea {
 	background: #fff0;
 }
 
-button.save, button.discard, button.add {
+button.save, button.discard, button.add, button.rename {
 	height: 1.6rem;
 	border: none;
 	background: gray;
@@ -212,7 +212,7 @@ button.save, button.discard, button.add {
 	margin-right: 5px;
 }
 
-#memoBox .label, #tagBox .label {
+#memoBox .label, #tagBox .label, #renameBox .label {
 	height: 1.6rem;
 	width: 65%;
 	background: gray;
@@ -231,7 +231,7 @@ button.save, button.discard, button.add {
 }
 
 /* mordal-window add tag */
-#tagBox .space {
+#tagBox .space, #renameBox .space {
 	width: 20%;
 	height: 6rem;
 	margin-top: 10%;
@@ -243,7 +243,11 @@ button.save, button.discard, button.add {
 	content: "add tag: ";
 }
 
-#tagBox .txt {
+#renameBox .label:before {
+	content: "rename from: ";
+}
+
+#tagBox .txt , #renameBox .txt {
 	background: #f3f3f366;
 	color: white;
 	border: none;
