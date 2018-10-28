@@ -152,6 +152,7 @@ input, textarea {
 .content .info .memo,
 .content .info .path {
 	overflow-x: scroll;
+	overflow-y: hidden;
 }
 
 .content .index {
